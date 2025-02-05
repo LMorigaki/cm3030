@@ -24,7 +24,6 @@ public class UIBringToFront : MonoBehaviour {
 		
 		// disable the ghost object
 		empty.SetActive(false);
-		empty.transform.SetParent(target.transform.parent);
     }
 
 	void BringToFront() {
@@ -33,6 +32,7 @@ public class UIBringToFront : MonoBehaviour {
 
 		// replace with empty object
 		empty.SetActive(true);
+		empty.transform.SetParent(target.transform.parent);
 		empty.transform.SetSiblingIndex(originalPos);
 	}
 
@@ -41,5 +41,6 @@ public class UIBringToFront : MonoBehaviour {
 		target.transform.SetSiblingIndex(originalPos);
 
 		empty.SetActive(false);
+		empty.transform.SetParent(null);
 	}
 }
