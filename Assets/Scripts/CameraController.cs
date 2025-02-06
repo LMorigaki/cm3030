@@ -9,12 +9,12 @@ public class CameraController : MonoBehaviour
 	public float zoomSpeed = 2;
 	public float minZoom = 1;
 	public float maxZoom = 20;
-	public float cameraTilt = 1;
+	public float cameraTilt = -10;
+	public float radius = 20.0f;
 	public Transform board;
 	
 	private Camera cam;
 	private float angle = 0.0f;
-	private float radius = 20.0f;
 	private Vector3 axisRotation;
 	private Vector2 deltaPos;
 	
@@ -23,6 +23,7 @@ public class CameraController : MonoBehaviour
 		transform.LookAt(board);
 		
 		axisRotation = board.position;
+		cam.orthographicSize = minZoom;
     }
 	
     void Update() {
