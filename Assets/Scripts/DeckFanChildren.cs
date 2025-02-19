@@ -16,12 +16,12 @@ public class DeckFanChildren : MonoBehaviour {
 		
 		RectTransform parentRect = GetComponent<RectTransform>();
 		float maxDist = transform.GetChild(0).gameObject.GetComponent<RectTransform>().position.x - parentRect.position.x;
-		
-		foreach(Transform tr in transform) {
+		foreach (Transform tr in transform) {
 			RectTransform rectChild = tr.gameObject.GetComponent<RectTransform>();
 			float dist = rectChild.position.x - parentRect.position.x;
-			float rotation = 5.0f + (dist / maxDist) * 5.0f;
+			float rotation = /*5.0f +*/ (dist / maxDist) * 5.0f; // modified for displaying 4+ cards
 			rectChild.transform.eulerAngles = new Vector3(0.0f, 0.0f, rotation);
 		}
 	}
 }
+

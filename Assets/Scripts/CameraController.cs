@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour
 		
 		Vector2 deltaMouse = value.Get<Vector2>();
 		
-		Debug.Log("Cam rotated : " + deltaMouse);
+		//Debug.Log("Cam rotated : " + deltaMouse);
 		
 	    angle += (deltaMouse.x * 0.01f) % 360;
 		Vector3 circle = new Vector3(Mathf.Cos(angle) * radius, transform.position.y, Mathf.Sin(angle) * radius);
@@ -56,7 +56,7 @@ public class CameraController : MonoBehaviour
 
 	public void OnZoomCam(InputValue value) {
 		float deltaScroll = value.Get<float>();
-		Debug.Log("Cam Zoom : " + deltaScroll);
+		//Debug.Log("Cam Zoom : " + deltaScroll);
 
 		float newSize = cam.orthographicSize + (zoomSpeed * deltaScroll);
 		cam.orthographicSize = Mathf.Clamp(newSize, minZoom, maxZoom);
@@ -64,6 +64,6 @@ public class CameraController : MonoBehaviour
 
 	public void OnMoveCam(InputValue value) {
 		deltaPos = value.Get<Vector2>();
-		Debug.Log("Cam Moved: " + deltaPos);
+		//Debug.Log("Cam Moved: " + deltaPos);
 	}
 }
