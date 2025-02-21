@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
 using UnityEngine.EventSystems;
-using UnityEditor;
 
 public class TilemapTest : MonoBehaviour
 {
@@ -14,10 +13,6 @@ public class TilemapTest : MonoBehaviour
 	public Camera cam;
 	public EventSystem inputEventSystem;
 
-	/// <summary>
-	/// Directory of building models in asset database
-	/// </summary>
-	public const string sourceDir = "Assets/External/Models/";
 	/// <summary>
 	/// An empty object as a folder holding all buildings on board
 	/// </summary>
@@ -71,7 +66,7 @@ public class TilemapTest : MonoBehaviour
         {
 			if (higTile != null)
             {
-				PlaceStructure(Random.Range(1, 21), (Vector3Int)higTile);
+				PlaceStructure((Vector3Int)higTile);
 			}
 		}
 		if (Input.GetKeyDown(KeyCode.Mouse1))
@@ -123,33 +118,16 @@ public class TilemapTest : MonoBehaviour
 	/// <param name="id">building id
 	/// <br/>might be modified into string address later</param>
 	/// <param name="location">cell position</param>
-	public void PlaceStructure(int id, Vector3Int location)
+	public void PlaceStructure(Vector3Int location)
 	{
 		location = new Vector3Int(location.x + offset, location.y + offset, 0);
 		if (buildings[location.x, location.y] != null)
         {
 			return;
         }
+		Object structure = ModelManager.LoadStructure(BuildingType.residential);
 
-		string _directry = sourceDir + "house_type" + id.ToString("00") + ".fbx";
-		Object structure;
-		try
-		{
-			structure = AssetDatabase.LoadAssetAtPath(_directry, typeof(GameObject));
-		}
-		catch (System.Exception)
-		{
-			Debug.LogError("Could not load object at:'" + _directry + "'");
-			throw;
-		}
-		
 		Vector3 _vector = new Vector3(location.y * 10 + 5, location.z * 10, location.x * 10 + 5);
-		// handle pivot problem on house_type 1 and 4
-		if (id == 1 || id == 4)
-        {
-			_vector.x -= 5;
-			_vector.z -= 5;
-        }
 		GameObject _object = (GameObject)Instantiate(structure, _vector, Quaternion.identity, buildingFolder);
 		buildings[location.x, location.y] = _object;
 	}
