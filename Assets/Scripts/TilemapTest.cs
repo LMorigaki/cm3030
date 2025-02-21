@@ -32,40 +32,44 @@ public class TilemapTest : MonoBehaviour
 	/// </summary>
 	private readonly int offset = Mathf.FloorToInt(boardSize / 2);
 
-	void Start() {
+	void Start()
+	{
 		tilemap = GetComponentInChildren<Tilemap>();
-		
+
 		// populate tiles
 		Vector3Int[] positions = new Vector3Int[boardSize * boardSize];
-        TileBase[] tileArray = new TileBase[positions.Length];
+		TileBase[] tileArray = new TileBase[positions.Length];
 		//int offset = Mathf.FloorToInt(boardSize / 2);
-		
-        for (int index = 0; index < positions.Length; index++)
-        {
-            positions[index] = new Vector3Int((index % boardSize) - offset, (index / boardSize) - offset, 0);
+
+		for (int index = 0; index < positions.Length; index++)
+		{
+			positions[index] = new Vector3Int((index % boardSize) - offset, (index / boardSize) - offset, 0);
 			//positions[index] = new Vector3Int((index % boardSize), (index / boardSize), 0);
 			tileArray[index] = tilePlain;
-        }
-		
-        tilemap.SetTiles(positions, tileArray);
+		}
+
+		tilemap.SetTiles(positions, tileArray);
 		GameObject.Find("Board").transform.position = new Vector3(offset * 10, 0, offset * 10);
-    }
-	
-    void FixedUpdate()
+	}
+
+	void FixedUpdate()
 	{
 		HighlightTile();
-    }
+	}
 
-	void Update() {
-		if(higTile.HasValue) {
+	void Update()
+	{
+		if (higTile.HasValue)
+		{
 			tilemap.SetTile(higTile.Value, tileHighlighted);
 		}
 
 		// Place and remove test
+
 		if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
+		{
 			if (higTile != null)
-            {
+			{
 				PlaceStructure((Vector3Int)higTile);
 			}
 		}
@@ -76,13 +80,14 @@ public class TilemapTest : MonoBehaviour
 				RemoveStructure((Vector3Int)higTile);
 			}
 		}
+
 	}
 
 	/// <summary>
 	/// Highlight hovered tile 
 	/// </summary>
 	void HighlightTile()
-    {
+	{
 		// unset highlighted tile
 		if (higTile.HasValue)
 		{
@@ -122,9 +127,9 @@ public class TilemapTest : MonoBehaviour
 	{
 		location = new Vector3Int(location.x + offset, location.y + offset, 0);
 		if (buildings[location.x, location.y] != null)
-        {
+		{
 			return;
-        }
+		}
 		Object structure = ModelManager.LoadStructure(BuildingType.residential);
 
 		Vector3 _vector = new Vector3(location.y * 10 + 5, location.z * 10, location.x * 10 + 5);
@@ -137,7 +142,7 @@ public class TilemapTest : MonoBehaviour
 	/// </summary>
 	/// <param name="location">cell position</param>
 	public void RemoveStructure(Vector3Int location)
-    {
+	{
 		location = new Vector3Int(location.x + offset, location.y + offset, 0);
 		if (buildings[location.x, location.y] == null)
 		{
