@@ -27,7 +27,7 @@ public class Card
     /// <summary>
     /// Address of building model in asset database
     /// </summary>
-    public string building;
+    public string buildingID;
     /// <summary>
     /// Type of card
     /// </summary>

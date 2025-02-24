@@ -9,16 +9,20 @@ public class Placeable : MonoBehaviour
     public bool Placed = false;
     public Vector2Int Size;
     public Vector3Int[] Location;
+    public CardInformation cardInfo;
 
 	private bool rotated = false;
     private Vector3 posOffset = Vector3.zero;
     private Vector3 offsetRotation;
 
+
     void Start()
     {
+        tilemap = GameObject.FindGameObjectWithTag("TilemapController").GetComponent<TilemapController>();
         tilemap.TileSelected += HandleTileSelected;
         tilemap.TileHighlighted += HandleTileHighlighted;
 
+        posOffset = tilemap.buildingOffset;
         offsetRotation = Vector3.right * transform.localScale.y;
     }
 
@@ -26,6 +30,8 @@ public class Placeable : MonoBehaviour
     {
         if (!cellPos.HasValue)
         {
+            // cancel placing building
+            cardInfo.OnPlaceCancelled();
             Destroy(gameObject);
             return;
         }
@@ -34,6 +40,7 @@ public class Placeable : MonoBehaviour
 
 		if (canPlace)
         {
+            // confirm placing building
             // paint tiles in location
             Location = tilemap.PlaceTile(cellPos.Value, Size);
 
@@ -44,9 +51,19 @@ public class Placeable : MonoBehaviour
 			// remove event handlers
             tilemap.TileSelected -= HandleTileSelected;
             tilemap.TileHighlighted -= HandleTileHighlighted;
+
+            // remove unused compoment
+            Destroy(GetComponent<MeshFilter>());
+            Destroy(GetComponent<MeshRenderer>());
+            Destroy(GetComponent<PlayerInput>());
+            // instantiate building as child
+            tilemap.PlaceStructure(transform, cardInfo.card.buildingID);
+            cardInfo.OnPlace();
         }
 		else
         {
+            // cancel placing building
+            cardInfo.OnPlaceCancelled();
             Destroy(gameObject);
         }
     }
