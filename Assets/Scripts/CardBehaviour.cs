@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Stores card info and provide behaviour of a card object
+/// Stores card info and provides behaviour of a card object
 /// </summary>
-public class CardInformation : MonoBehaviour
+public class CardBehaviour : MonoBehaviour
 {
     /// <summary>
     /// Card info of this card object
@@ -17,7 +17,7 @@ public class CardInformation : MonoBehaviour
     /// Initialize child objects base on given card info
     /// </summary>
     /// <param name="card"></param>
-    public void Initialize(Card card)
+    public void SetCardInfo(Card card)
     {
         this.card = card;
         Transform _cardButton = transform.Find("CardButton");
@@ -34,7 +34,7 @@ public class CardInformation : MonoBehaviour
         if (card == null)
         {
             Card _card = new Card("Test", "Some text", CardType.Building, 0);
-            Initialize(_card);
+            SetCardInfo(_card);
         }
         
     }
@@ -54,11 +54,14 @@ public class CardInformation : MonoBehaviour
         switch (card.type)
         {
             case CardType.Building:
+                // instantiate placeable object
                 GameObject placeable = Resources.Load<GameObject>("Prefabs/Placeable");
-                placeable.GetComponent<Placeable>().cardInfo = this;
+                placeable.GetComponent<Placeable>().cardBehaviour = this;
                 Transform folder = GameObject.FindGameObjectWithTag("BuildingFolder").transform;
                 Instantiate<GameObject>(placeable, folder);
                 // hide card deck
+                GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().HideDeck();
+
                 // comfirm place building
                 //      call remove()
                 // cancel place building
@@ -87,6 +90,7 @@ public class CardInformation : MonoBehaviour
     {
         // remove self from deck
         // destroy self
+        Destroy(gameObject);
     }
 
     public void Remove()

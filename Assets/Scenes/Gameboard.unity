@@ -121,6 +121,24 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &76949006 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9093178232855145516, guid: 7a7fc18f55bdd2e178c4e790ed46b221,
+    type: 3}
+  m_PrefabInstance: {fileID: 616103505}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &76949009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 76949006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20269390f559610428ff07a0c2f45360, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &135750532
 GameObject:
   m_ObjectHideFlags: 0
@@ -519,6 +537,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1106623922}
     m_Modifications:
+    - target: {fileID: 9093178232604027804, guid: 7a7fc18f55bdd2e178c4e790ed46b221,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9093178232604027805, guid: 7a7fc18f55bdd2e178c4e790ed46b221,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -563,6 +586,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: DeckOverlay
+      objectReference: {fileID: 0}
+    - target: {fileID: 9093178232855145516, guid: 7a7fc18f55bdd2e178c4e790ed46b221,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9093178232855145516, guid: 7a7fc18f55bdd2e178c4e790ed46b221,
+        type: 3}
+      propertyPath: m_TagString
+      value: DeckFolder
       objectReference: {fileID: 0}
     - target: {fileID: 9093178232855145517, guid: 7a7fc18f55bdd2e178c4e790ed46b221,
         type: 3}
@@ -1116,7 +1149,7 @@ MonoBehaviour:
   Placed: 0
   Size: {x: 1, y: 1}
   Location: []
-  cardInfo: {fileID: 0}
+  cardBehaviour: {fileID: 0}
 --- !u!1 &1504186910
 GameObject:
   m_ObjectHideFlags: 0
@@ -1328,7 +1361,7 @@ MonoBehaviour:
   Placed: 0
   Size: {x: 3, y: 1}
   Location: []
-  cardInfo: {fileID: 0}
+  cardBehaviour: {fileID: 0}
 --- !u!114 &1527421497
 MonoBehaviour:
   m_ObjectHideFlags: 0

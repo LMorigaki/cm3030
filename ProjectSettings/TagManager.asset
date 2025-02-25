@@ -6,6 +6,7 @@ TagManager:
   tags:
   - BuildingFolder
   - TilemapController
+  - DeckFolder
   layers:
   - Default
   - TransparentFX

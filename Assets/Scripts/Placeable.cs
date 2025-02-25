@@ -9,7 +9,7 @@ public class Placeable : MonoBehaviour
     public bool Placed = false;
     public Vector2Int Size;
     public Vector3Int[] Location;
-    public CardInformation cardInfo;
+    public CardBehaviour cardBehaviour;
 
 	private bool rotated = false;
     private Vector3 posOffset = Vector3.zero;
@@ -31,8 +31,7 @@ public class Placeable : MonoBehaviour
         if (!cellPos.HasValue)
         {
             // cancel placing building
-            cardInfo.OnPlaceCancelled();
-            Destroy(gameObject);
+            OnPlaceCancelled();
             return;
         }
 
@@ -57,14 +56,13 @@ public class Placeable : MonoBehaviour
             Destroy(GetComponent<MeshRenderer>());
             Destroy(GetComponent<PlayerInput>());
             // instantiate building as child
-            tilemap.PlaceStructure(transform, cardInfo.card.buildingID);
-            cardInfo.OnPlace();
+            tilemap.PlaceStructure(transform, cardBehaviour.card.buildingID);
+            cardBehaviour.OnPlace();
         }
 		else
         {
             // cancel placing building
-            cardInfo.OnPlaceCancelled();
-            Destroy(gameObject);
+            OnPlaceCancelled();
         }
     }
 
@@ -84,6 +82,21 @@ public class Placeable : MonoBehaviour
         {
 			// tint object red
         }
+    }
+
+    void OnPlaceCancelled()
+    {
+        
+        StartCoroutine(DelayOnPlaceCancelled());
+    }
+
+    // create delay to prevent another card is clicked after showing deck
+    IEnumerator DelayOnPlaceCancelled()
+    {
+        yield return new WaitForSeconds(0.5f);
+        GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
+        cardBehaviour.OnPlaceCancelled();
+        Destroy(gameObject);
     }
 
     void Rotate()

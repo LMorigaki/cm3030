@@ -16,7 +16,7 @@ public class CardTest : MonoBehaviour
         Card _card = new Card("Building02", "Builds building02", CardType.Building, 0);
         _card.buildingID = "r02";
         GameObject newcard = GameObject.Instantiate(card, folder);
-        newcard.GetComponent<CardInformation>().Initialize(_card);
+        newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
         
     }
 
