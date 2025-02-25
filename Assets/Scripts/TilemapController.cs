@@ -13,6 +13,7 @@ public class TilemapController : MonoBehaviour
 	public EventSystem inputEventSystem;
     public TileBase fillTile;
     public TileBase highlightTile;
+    public readonly Vector3Int buildingOffset = new Vector3Int(5, 0, 5);
 
     public event EventHandler<Vector3Int?> TileHighlighted;
     public event EventHandler<Vector3Int?> TileSelected;
@@ -115,5 +116,16 @@ public class TilemapController : MonoBehaviour
         tilemap.SetTiles(positions, tiles);
 
         return positions;
+    }
+
+    /// <summary>
+    /// Instantiate a building and assign to caller(placeable)
+    /// </summary>
+    /// <param name="id">building id</param>
+    /// <param name="parent">transform of parent</param>
+    public void PlaceStructure(Transform parent, string id)
+    {
+        GameObject structure = ModelManager.LoadStructure(id);
+        Instantiate<GameObject>(structure, parent);
     }
 }

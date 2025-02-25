@@ -9,16 +9,20 @@ public class Placeable : MonoBehaviour
     public bool Placed = false;
     public Vector2Int Size;
     public Vector3Int[] Location;
+    public CardBehaviour cardBehaviour;
 
 	private bool rotated = false;
     private Vector3 posOffset = Vector3.zero;
     private Vector3 offsetRotation;
 
+
     void Start()
     {
+        tilemap = GameObject.FindGameObjectWithTag("TilemapController").GetComponent<TilemapController>();
         tilemap.TileSelected += HandleTileSelected;
         tilemap.TileHighlighted += HandleTileHighlighted;
 
+        posOffset = tilemap.buildingOffset;
         offsetRotation = Vector3.right * transform.localScale.y;
     }
 
@@ -26,7 +30,8 @@ public class Placeable : MonoBehaviour
     {
         if (!cellPos.HasValue)
         {
-            Destroy(gameObject);
+            // cancel placing building
+            OnPlaceCancelled();
             return;
         }
 
@@ -34,6 +39,7 @@ public class Placeable : MonoBehaviour
 
 		if (canPlace)
         {
+            // confirm placing building
             // paint tiles in location
             Location = tilemap.PlaceTile(cellPos.Value, Size);
 
@@ -44,10 +50,19 @@ public class Placeable : MonoBehaviour
 			// remove event handlers
             tilemap.TileSelected -= HandleTileSelected;
             tilemap.TileHighlighted -= HandleTileHighlighted;
+
+            // remove unused compoment
+            Destroy(GetComponent<MeshFilter>());
+            Destroy(GetComponent<MeshRenderer>());
+            Destroy(GetComponent<PlayerInput>());
+            // instantiate building as child
+            tilemap.PlaceStructure(transform, cardBehaviour.card.buildingID);
+            cardBehaviour.OnPlace();
         }
 		else
         {
-            Destroy(gameObject);
+            // cancel placing building
+            OnPlaceCancelled();
         }
     }
 
@@ -67,6 +82,21 @@ public class Placeable : MonoBehaviour
         {
 			// tint object red
         }
+    }
+
+    void OnPlaceCancelled()
+    {
+        
+        StartCoroutine(DelayOnPlaceCancelled());
+    }
+
+    // create delay to prevent another card is clicked after showing deck
+    IEnumerator DelayOnPlaceCancelled()
+    {
+        yield return new WaitForSeconds(0.5f);
+        GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
+        cardBehaviour.OnPlaceCancelled();
+        Destroy(gameObject);
     }
 
     void Rotate()
