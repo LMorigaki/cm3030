@@ -28,6 +28,7 @@ public class TilemapController : MonoBehaviour
 	
     public void OnClick(InputValue value)
     {
+
         if (inputEventSystem.IsPointerOverGameObject())
         {
             return;

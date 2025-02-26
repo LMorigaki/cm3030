@@ -31,12 +31,13 @@ public class CardBehaviour : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        /*
         if (card == null)
         {
-            Card _card = new Card("Test", "Some text", CardType.Building, 0);
+            Card _card = new Card("Test", "Some text", CardType.Building);
             SetCardInfo(_card);
         }
-        
+        */
     }
 
     // Update is called once per frame
@@ -98,4 +99,11 @@ public class CardBehaviour : MonoBehaviour
         // remove reference to this card from other objects
         // destroy self
     }
+
+    private void OnDestroy()
+    {
+        GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().FanCards();
+    }
+
+    
 }

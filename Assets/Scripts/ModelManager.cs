@@ -4,9 +4,9 @@ using UnityEngine;
 
 public enum BuildingType
 {
-    residential,
-    commercial,
-    industrial
+    Residential,
+    Commercial,
+    Industrial
 }
 
 /// <summary>
@@ -26,62 +26,6 @@ public static class ModelManager
 	/// Directory of industrial building models in asset database
 	/// </summary>
     public const string industrialDir = "Industrial/";
-
-    /// <summary>
-    /// Loads a random building from given type of buildings
-    /// </summary>
-    /// <param name="type">Type of structure</param>
-    /// <param name="id">If given, loads a specified structure</param>
-    public static GameObject LoadStructure(BuildingType type, int? id = null)
-    {
-        // Get random structure when id is not specified
-        if (id is null)
-        {
-            switch (type)
-            {
-                case BuildingType.residential:
-                    id = Random.Range(1, 21);
-                    break;
-                case BuildingType.commercial:
-                    // todo: handle random id for commercial building
-                    break;
-                case BuildingType.industrial:
-                    // todo: handle random id for industrial building
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        string _directory = "house_type" + ((int)id).ToString("00");
-        switch (type)
-        {
-            case BuildingType.residential:
-                _directory = residentialDir + _directory;
-                break;
-            case BuildingType.commercial:
-                _directory = "";
-                break;
-            case BuildingType.industrial:
-                _directory = "";
-                break;
-            default:
-                break;
-        }
-        GameObject structure;
-        try
-        {
-            structure = Resources.Load<GameObject>(_directory);
-        }
-        catch (System.Exception)
-        {
-            Debug.LogError("Could not load building at 'Asset/Resources/" + _directory + "'");
-            throw;
-        }
-        
-
-        return structure;
-    }
 
     /// <summary>
     /// Loads a specific building from asset database
@@ -134,6 +78,22 @@ public static class ModelManager
         return structure;
     }
 
-    
+    /// <summary>
+    /// Return random building id with specified type
+    /// </summary>
+    /// <param name="type">building type</param>
+    public static string GetRandomBuilding(BuildingType type)
+    {
+        switch (type)
+        {
+            case BuildingType.Residential:
+                return "r" + Random.Range(1, 22).ToString("00");
+            case BuildingType.Commercial:
+                return "c";
+            case BuildingType.Industrial:
+                return "i";
+        }
+        return "";
+    }
 
 }

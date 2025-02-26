@@ -8,10 +8,11 @@ public class UIBringToFront : MonoBehaviour {
 	private int originalPos;
 	
 	private GameObject empty;
-	
+	Transform folder;
+
+
 	void Start() {
         originalPos = target.transform.GetSiblingIndex();
-		
 		empty = new GameObject();
 		
 		// add rect to ghost object
@@ -24,7 +25,9 @@ public class UIBringToFront : MonoBehaviour {
 		
 		// disable the ghost object
 		empty.SetActive(false);
-    }
+		folder = GameObject.FindGameObjectWithTag("DeckFolder").transform.Find("Placeholders");
+		empty.transform.SetParent(folder);
+	}
 
 	void BringToFront() {
 		target.GetComponent<LayoutElement>().ignoreLayout = true;
@@ -41,6 +44,22 @@ public class UIBringToFront : MonoBehaviour {
 		target.transform.SetSiblingIndex(originalPos);
 
 		empty.SetActive(false);
-		empty.transform.SetParent(null);
+		empty.transform.SetParent(folder.transform);
 	}
+
+	public void UpdateIndex()
+    {
+		originalPos = target.transform.GetSiblingIndex();
+		RectTransform rect = empty.GetComponent<RectTransform>();
+		RectTransform targetRect = target.GetComponent<RectTransform>();
+		rect.anchorMin = targetRect.anchorMin;
+		rect.anchorMax = targetRect.anchorMax;
+		rect.anchoredPosition = targetRect.anchoredPosition;
+		rect.sizeDelta = targetRect.sizeDelta;
+	}
+
+    private void OnDestroy()
+    {
+		Destroy(empty);
+    }
 }

@@ -52,14 +52,14 @@ public class CameraController : MonoBehaviour
 		
 		Vector3 lpos = (axisRotation + cameraTilt * Vector3.up) - transform.position;
 		transform.rotation = Quaternion.LookRotation(lpos);
-		//cam.transform.LookAt(board);
+		cam.transform.LookAt(board);
 	}
 
 	public void OnZoomCam(InputValue value) {
 		float deltaScroll = value.Get<float>();
 		//Debug.Log("Cam Zoom : " + deltaScroll);
 
-		float newSize = cam.orthographicSize + (zoomSpeed * deltaScroll);
+		float newSize = cam.orthographicSize + (zoomSpeed * deltaScroll / 120);
 		cam.orthographicSize = Mathf.Clamp(newSize, minZoom, maxZoom);
 	}
 

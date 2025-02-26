@@ -40,24 +40,7 @@ public class Placeable : MonoBehaviour
 		if (canPlace)
         {
             // confirm placing building
-            // paint tiles in location
-            Location = tilemap.PlaceTile(cellPos.Value, Size);
-
-            // set placed to true
-            Placed = true;
-            transform.position = tilemap.CellWorldPosition(cellPos.Value) + posOffset;
-
-			// remove event handlers
-            tilemap.TileSelected -= HandleTileSelected;
-            tilemap.TileHighlighted -= HandleTileHighlighted;
-
-            // remove unused compoment
-            Destroy(GetComponent<MeshFilter>());
-            Destroy(GetComponent<MeshRenderer>());
-            Destroy(GetComponent<PlayerInput>());
-            // instantiate building as child
-            tilemap.PlaceStructure(transform, cardBehaviour.card.buildingID);
-            cardBehaviour.OnPlace();
+            OnPlace(cellPos);
         }
 		else
         {
@@ -84,16 +67,32 @@ public class Placeable : MonoBehaviour
         }
     }
 
-    void OnPlaceCancelled()
+    void OnPlace(Vector3Int? cellPos)
     {
-        
-        StartCoroutine(DelayOnPlaceCancelled());
+        // paint tiles in location
+        Location = tilemap.PlaceTile(cellPos.Value, Size);
+
+        // set placed to true
+        Placed = true;
+        transform.position = tilemap.CellWorldPosition(cellPos.Value) + posOffset;
+
+        // remove event handlers
+        tilemap.TileSelected -= HandleTileSelected;
+        tilemap.TileHighlighted -= HandleTileHighlighted;
+
+        // remove unused compoment
+        Destroy(GetComponent<MeshFilter>());
+        Destroy(GetComponent<MeshRenderer>());
+        Destroy(GetComponent<PlayerInput>());
+        // instantiate building as child
+        tilemap.PlaceStructure(transform, cardBehaviour.card.buildingID);
+
+        GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
+        cardBehaviour.OnPlace();
     }
 
-    // create delay to prevent another card is clicked after showing deck
-    IEnumerator DelayOnPlaceCancelled()
+    void OnPlaceCancelled()
     {
-        yield return new WaitForSeconds(0.5f);
         GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
         cardBehaviour.OnPlaceCancelled();
         Destroy(gameObject);
