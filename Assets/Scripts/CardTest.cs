@@ -13,9 +13,15 @@ public class CardTest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 3; i++)
         {
             Card _card = Card.RandomBuildingCard(BuildingType.Residential);
+            GameObject newcard = GameObject.Instantiate(card, folder);
+            newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            Card _card = Card.RandomBuildingCard(BuildingType.Commercial);
             GameObject newcard = GameObject.Instantiate(card, folder);
             newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
         }

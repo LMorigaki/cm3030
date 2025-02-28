@@ -40,29 +40,10 @@ public static class ModelManager
     /// if loading failed, returns empty gameobject</returns>
     public static GameObject LoadStructure(string id)
     {
-        if (id.Length != 3)
+        string _directory = ValidateID(id);
+        if (_directory == null)
         {
-            Debug.LogError("Incorrect length of building ID, expected 3 get: '" + id.Length + "'");
-            return new GameObject();
-        }
-
-        string _directory = "house_type" + id.Substring(1, 2);
-        if (id[0] == 'r')
-        {
-            _directory = residentialDir + _directory;
-        }
-        else if (id[0] == 'c')
-        {
-            _directory = residentialDir + _directory;
-        }
-        else if (id[0] == 'i')
-        {
-            _directory = residentialDir + _directory;
-        }
-        else
-        {
-            Debug.LogError("Incorrect format of building ID, expected character r/c/i followed by 2 digit number get: '" + id + "'");
-            return new GameObject();
+            return null;
         }
 
         GameObject structure;
@@ -79,6 +60,34 @@ public static class ModelManager
     }
 
     /// <summary>
+    /// Loads image of a specific building from asset database
+    /// </summary>
+    /// <param name="id">building id</param>
+    /// <returns></returns>
+    public static Sprite LoadImage(string id)
+    {
+        string _directory = ValidateID(id);
+        if (_directory == null)
+        {
+            return null;
+        }
+
+        string[] vs = _directory.Split(' ');
+        _directory = vs[0] + " img " + vs[1];
+        Sprite img;
+        try
+        {
+            img = Resources.Load<Sprite>(_directory);
+        }
+        catch (System.Exception)
+        {
+            Debug.LogError("Could not load sprite at 'Asset/Resources/" + _directory + "'");
+            throw;
+        }
+        return img;
+    }
+
+    /// <summary>
     /// Return random building id with specified type
     /// </summary>
     /// <param name="type">building type</param>
@@ -87,13 +96,41 @@ public static class ModelManager
         switch (type)
         {
             case BuildingType.Residential:
-                return "r" + Random.Range(1, 22).ToString("00");
+                return "r" + Random.Range(1, 22);
             case BuildingType.Commercial:
-                return "c";
+                return "c" + Random.Range(1, 20);
             case BuildingType.Industrial:
                 return "i";
         }
         return "";
+    }
+
+    /// <summary>
+    /// Validates building id and converts it to directory
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns>If vaild id, returns directory of building, if invaild id, returns null</returns>
+    static string ValidateID(string id)
+    {
+        string _directory = "building (" + id.Remove(0, 1) + ")";
+        if (id[0] == 'r')
+        {
+            _directory = residentialDir + _directory;
+        }
+        else if (id[0] == 'c')
+        {
+            _directory = commercialDir + _directory;
+        }
+        else if (id[0] == 'i')
+        {
+            _directory = industrialDir + _directory;
+        }
+        else
+        {
+            Debug.LogError("Incorrect format of building ID, expected character r/c/i followed by number get: '" + id + "'");
+            return null;
+        }
+        return _directory;
     }
 
 }

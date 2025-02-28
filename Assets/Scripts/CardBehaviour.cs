@@ -23,8 +23,13 @@ public class CardBehaviour : MonoBehaviour
         Transform _cardButton = transform.Find("CardButton");
         GameObject _title = _cardButton.Find("Title").gameObject;
         _title.GetComponent<Text>().text = card.title;
+
         GameObject _description = _cardButton.Find("Description").gameObject;
         _description.GetComponent<Text>().text = card.description;
+
+        GameObject _image = _cardButton.Find("Image").gameObject;
+        _image.GetComponent<Image>().sprite = ModelManager.LoadImage(card.buildingID);
+
         transform.Find("CardButton").GetComponent<Button>().interactable = true;
     }
 

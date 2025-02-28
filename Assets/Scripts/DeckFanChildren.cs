@@ -21,7 +21,6 @@ public class DeckFanChildren : MonoBehaviour {
 		Canvas.ForceUpdateCanvases();
 		
 		RectTransform parentRect = GetComponent<RectTransform>();
-		print(transform.childCount);
 		if (transform.childCount == 0)
         {
 			yield break;

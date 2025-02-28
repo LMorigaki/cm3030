@@ -89,6 +89,7 @@ public class Placeable : MonoBehaviour
 
         GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
         cardBehaviour.OnPlace();
+        cardBehaviour = null;
     }
 
     void OnPlaceCancelled()
