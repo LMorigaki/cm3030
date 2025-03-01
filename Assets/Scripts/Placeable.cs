@@ -9,12 +9,30 @@ public class Placeable : MonoBehaviour
     public bool Placed = false;
     public Vector2Int Size;
     public Vector3Int[] Location;
+    [HideInInspector]
     public CardBehaviour cardBehaviour;
+    public Material matCanPlace, matCannotPlace;
 
 	private bool rotated = false;
     private Vector3 posOffset = Vector3.zero;
     private Vector3 offsetRotation;
-
+    /// <summary>
+    /// flag indicating if building is rendered as placeable object<br/>
+    /// this flag is used to reduce times of assgning materials to mesh renderer
+    /// </summary>
+    bool displayPlaceable = true;
+    /// <summary>
+    /// building as child of this object
+    /// </summary>
+    GameObject structure;
+    /// <summary>
+    /// mesh renderer of building
+    /// </summary>
+    Renderer meshRenderer;
+    /// <summary>
+    /// origianl materials of building
+    /// </summary>
+    Material[] materials;
 
     void Start()
     {
@@ -24,6 +42,14 @@ public class Placeable : MonoBehaviour
 
         posOffset = tilemap.buildingOffset;
         offsetRotation = Vector3.right * transform.localScale.y;
+
+        // load and assign building as child of this object
+        structure = ModelManager.LoadStructure(cardBehaviour.card.buildingID);
+        Instantiate<GameObject>(structure, transform);
+        // save original materials of building and assign transparent meterial
+        meshRenderer = GetComponentInChildren<Renderer>();
+        materials = meshRenderer.sharedMaterials;
+        SetMaterials(matCanPlace);
     }
 
     void HandleTileSelected(object sender, Vector3Int? cellPos)
@@ -53,22 +79,31 @@ public class Placeable : MonoBehaviour
     {
         if (!cellPos.HasValue)
         {
-			GetComponent<Renderer>().enabled = false;
             return;
         }
 		
         transform.position = tilemap.CellWorldPosition(cellPos.Value) + posOffset;
-		GetComponent<Renderer>().enabled = true;
 
 		bool canPlace = tilemap.CanPlace(cellPos.Value, Size);
-        if (!canPlace)
+        // reduce assignment of materials
+        if (canPlace != displayPlaceable)
         {
-			// tint object red
+            if (canPlace)
+            {
+                SetMaterials(matCanPlace);
+                displayPlaceable = true;
+            }
+            else
+            {
+                SetMaterials(matCannotPlace);
+                displayPlaceable = false;
+            }
         }
     }
 
     void OnPlace(Vector3Int? cellPos)
     {
+        
         // paint tiles in location
         Location = tilemap.PlaceTile(cellPos.Value, Size);
 
@@ -81,13 +116,13 @@ public class Placeable : MonoBehaviour
         tilemap.TileHighlighted -= HandleTileHighlighted;
 
         // remove unused compoment
-        Destroy(GetComponent<MeshFilter>());
-        Destroy(GetComponent<MeshRenderer>());
         Destroy(GetComponent<PlayerInput>());
-        // instantiate building as child
-        tilemap.PlaceStructure(transform, cardBehaviour.card.buildingID);
+
+        // restore original materials
+        meshRenderer.materials = materials;
 
         GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
+        tilemap.OnPlace(gameObject, cardBehaviour.card, cellPos.Value);
         cardBehaviour.OnPlace();
         cardBehaviour = null;
     }
@@ -97,6 +132,20 @@ public class Placeable : MonoBehaviour
         GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
         cardBehaviour.OnPlaceCancelled();
         Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// sets all materials of building to single specified material
+    /// </summary>
+    /// <param name="material">specified material</param>
+    void SetMaterials(Material material)
+    {
+        Material[] _materials = meshRenderer.sharedMaterials;
+        for (int i = 0; i < _materials.Length; i++)
+        {
+            _materials[i] = material;
+        }
+        meshRenderer.materials = _materials;
     }
 
     void Rotate()
@@ -137,4 +186,5 @@ public class Placeable : MonoBehaviour
 		tilemap.TileSelected -= HandleTileSelected;
         tilemap.TileHighlighted -= HandleTileHighlighted;
     }
+
 }

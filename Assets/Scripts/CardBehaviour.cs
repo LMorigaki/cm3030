@@ -11,13 +11,13 @@ public class CardBehaviour : MonoBehaviour
     /// <summary>
     /// Card info of this card object
     /// </summary>
-    public Card card;
+    public BuildingCard card;
 
     /// <summary>
     /// Initialize child objects base on given card info
     /// </summary>
     /// <param name="card"></param>
-    public void SetCardInfo(Card card)
+    public void SetCardInfo(BuildingCard card)
     {
         this.card = card;
         Transform _cardButton = transform.Find("CardButton");
@@ -27,9 +27,11 @@ public class CardBehaviour : MonoBehaviour
         GameObject _description = _cardButton.Find("Description").gameObject;
         _description.GetComponent<Text>().text = card.description;
 
-        GameObject _image = _cardButton.Find("Image").gameObject;
-        _image.GetComponent<Image>().sprite = ModelManager.LoadImage(card.buildingID);
-
+        if (card.type == CardType.Building)
+        {
+            GameObject _image = _cardButton.Find("Image").gameObject;
+            _image.GetComponent<Image>().sprite = ModelManager.LoadImage(card.buildingID);
+        }
         transform.Find("CardButton").GetComponent<Button>().interactable = true;
     }
 
@@ -107,7 +109,11 @@ public class CardBehaviour : MonoBehaviour
 
     private void OnDestroy()
     {
-        GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().FanCards();
+        GameObject deck = GameObject.FindGameObjectWithTag("DeckFolder");
+        if (deck != null)
+        {
+            deck.GetComponent<DeckController>().FanCards();
+        }
     }
 
     

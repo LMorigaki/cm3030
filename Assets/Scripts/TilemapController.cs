@@ -20,9 +20,11 @@ public class TilemapController : MonoBehaviour
 
     private Tilemap tilemap;
 	private Vector3Int? higTile = null;
+    Board board;
 
     void Start()
     {
+        board = new Board(boardSize);
         tilemap = GetComponentInChildren<Tilemap>();
     }
 	
@@ -111,22 +113,17 @@ public class TilemapController : MonoBehaviour
                 int index = (x * size.y) + y;
                 positions[index] = cellLoc + new Vector3Int(y, x, 0);
                 tiles[index] = fillTile;
+                Debug.Log(positions[index]);
             }
         }
-		
+        
         tilemap.SetTiles(positions, tiles);
 
         return positions;
     }
 
-    /// <summary>
-    /// Instantiate a building and assign to caller(placeable)
-    /// </summary>
-    /// <param name="id">building id</param>
-    /// <param name="parent">transform of parent</param>
-    public void PlaceStructure(Transform parent, string id)
+    public void OnPlace(GameObject building, BuildingCard card, Vector3Int location)
     {
-        GameObject structure = ModelManager.LoadStructure(id);
-        Instantiate<GameObject>(structure, parent);
+        board.InsertBuilding(building, card, location);
     }
 }

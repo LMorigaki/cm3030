@@ -15,13 +15,13 @@ public class CardTest : MonoBehaviour
     {
         for (int i = 0; i < 3; i++)
         {
-            Card _card = Card.RandomBuildingCard(BuildingType.Residential);
+            BuildingCard _card = BuildingCard.RandomBuildingCard(BuildingType.Residential);
             GameObject newcard = GameObject.Instantiate(card, folder);
             newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
         }
         for (int i = 0; i < 3; i++)
         {
-            Card _card = Card.RandomBuildingCard(BuildingType.Commercial);
+            BuildingCard _card = BuildingCard.RandomBuildingCard(BuildingType.Commercial);
             GameObject newcard = GameObject.Instantiate(card, folder);
             newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
         }
