@@ -3,9 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
+/// a table storing all adjacent bonus from all buildings
+/// </summary>
+struct BonusTable
+{
+    private float[,,,] bonuses;
+
+    public BonusTable(int size)
+    {
+        bonuses = new float[4, size, size, 3];
+    }
+
+    public float Get(BonusType bonusType, int x, int y, BuildingType buildingType)
+    {
+        return bonuses[(int)bonusType, x, y, (int)buildingType];
+    }
+
+    public void Set(BonusType bonusType, int x, int y, BuildingType buildingType, float value)
+    {
+        bonuses[(int)bonusType, x, y, (int)buildingType] = value;
+    }
+}
+
+/// <summary>
 /// stores and provide functions about buildings, upkeeps, profits and adjacent bonus info on board
 /// </summary>
-public class Board : MonoBehaviour
+public class Board
 {
     /// <summary>
     /// size of the board
@@ -25,30 +48,14 @@ public class Board : MonoBehaviour
     /// </summary>
     int[,] upkeeps;
     /// <summary>
-    /// additional upkeeps rate<br/>
-    /// total upkeep = upkeeps * (1 + ratio upkeeps) + fixed upkeeps
-    /// </summary>
-    float[,] ratioUpkeeps;
-    /// <summary>
-    /// additional upkeeps<br/>
-    /// total upkeep = upkeeps * (1 + ratio upkeeps) + fixed upkeeps
-    /// </summary>
-    float[,] fixedUpkeeps;
-    /// <summary>
     /// basic profit of each tile<br/>
     /// total profit = profits * (1 + ratio bonus) + fixed bonus
     /// </summary>
     int[,] profits;
     /// <summary>
-    /// additional profit rate<br/>
-    /// total profit = profits * (1 + ratio bonus) + fixed bonus
+    /// a table storing all adjacent bonus from all buildings
     /// </summary>
-    float[,] ratioBonus;
-    /// <summary>
-    /// addition profit<br/>
-    /// total upkeep = upkeeps * (1 + ratio bonus) + fixed bonus
-    /// </summary>
-    float[,] fixedBonus;
+    BonusTable bonusTable;
 
     public Board(int size)
     {
@@ -56,11 +63,8 @@ public class Board : MonoBehaviour
         tiles = new GameObject[size, size];
         buildingCards = new BuildingCard[size, size];
         upkeeps = new int[size, size];
-        ratioUpkeeps = new float[size, size];
-        fixedUpkeeps = new float[size, size];
         profits = new int[size, size];
-        ratioBonus = new float[size, size];
-        fixedBonus = new float[size, size];
+        bonusTable = new BonusTable(size);
     }
 
     /// <summary>
@@ -77,10 +81,10 @@ public class Board : MonoBehaviour
         upkeeps[index.x, index.y] = card.upkeep;
         profits[index.x, index.y] = card.profit;
         // updates adjacent bonus
-        ApplyMatrix(card.fixedUpkeeps, fixedUpkeeps, index);
-        ApplyMatrix(card.ratioUpkeeps, ratioUpkeeps, index);
-        ApplyMatrix(card.fixedBonus, fixedBonus, index);
-        ApplyMatrix(card.ratioBonus, ratioBonus, index);
+        for (int i = 0; i < card.bonus.Length; i++)
+        {
+            ApplyMatrix(card.bonus[i], index);
+        }
     }
 
     /// <summary>
@@ -90,14 +94,14 @@ public class Board : MonoBehaviour
     /// <param name="target">target array in board</param>
     /// <param name="index">location of building, converted to array index</param>
     /// <param name="isReduction">if true, removes the value of matrix from target array</param>
-    void ApplyMatrix(float[,] matrix, float[,] target, Vector2Int index, bool isReduction = false)
+    void ApplyMatrix(Bonus bonus, Vector2Int index, bool isReduction = false)
     {
-        int fromX = index.x - Mathf.FloorToInt(matrix.GetLength(0) / 2);
-        int fromY = index.y - Mathf.FloorToInt(matrix.GetLength(1) / 2);
+        int fromX = index.x - Mathf.FloorToInt(bonus.targets.GetLength(0) / 2);
+        int fromY = index.y - Mathf.FloorToInt(bonus.targets.GetLength(1) / 2);
 
-        for (int i = 0; i < matrix.GetLength(0); i++)
+        for (int i = 0; i < bonus.targets.GetLength(0); i++)
         {
-            for (int j = 0; j < matrix.GetLength(1); j++)
+            for (int j = 0; j < bonus.targets.GetLength(1); j++)
             {
                 int x = fromX + i;
                 int y = fromY + j;
@@ -105,15 +109,20 @@ public class Board : MonoBehaviour
                 {
                     continue;
                 }
+                float value = bonus.targets[i, j] * bonus.value;
                 if (isReduction)
                 {
-                    matrix[i, j] = matrix[i, j] * -1;
+                    value = value * -1;
                 }
-                target[x, y] += matrix[i, j];
+                for (int k = 0; k < bonus.targetTypes.Length; k++)
+                {
+                    bonusTable.Set(bonus.type, x, y, bonus.targetTypes[k], bonus.value);
+                }
             }
         }
     }
 
+    /*
     /// <summary>
     /// calculates the total upkeep of buildings on board
     /// </summary>
@@ -146,6 +155,7 @@ public class Board : MonoBehaviour
         }
         return sum;
     }
+    */
 
     /// <summary>
     /// returns true if a tile is occupied

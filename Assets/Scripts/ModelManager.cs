@@ -9,6 +9,32 @@ public enum BuildingType
     Industrial
 }
 
+public struct BuildingID
+{
+    public BuildingType type;
+    public ushort id;
+    public override string ToString()
+    {
+        string str = "";
+        switch (type)
+        {
+            case BuildingType.Residential:
+                str += "r";
+                break;
+            case BuildingType.Commercial:
+                str += "c";
+                break;
+            case BuildingType.Industrial:
+                str += "i";
+                break;
+            default:
+                break;
+        }
+        str += id;
+        return str;
+    }
+}
+
 /// <summary>
 /// Provides function for loading building models from asset database
 /// </summary>
@@ -38,9 +64,9 @@ public static class ModelManager
     /// </param>
     /// <returns>building gameobject,
     /// if loading failed, returns empty gameobject</returns>
-    public static GameObject LoadStructure(string id)
+    public static GameObject LoadStructure(BuildingID id)
     {
-        string _directory = ValidateID(id);
+        string _directory = GetDirectory(id);
         if (_directory == null)
         {
             return null;
@@ -64,9 +90,9 @@ public static class ModelManager
     /// </summary>
     /// <param name="id">building id</param>
     /// <returns></returns>
-    public static Sprite LoadImage(string id)
+    public static Sprite LoadImage(BuildingID id)
     {
-        string _directory = ValidateID(id);
+        string _directory = GetDirectory(id);
         if (_directory == null)
         {
             return null;
@@ -91,44 +117,47 @@ public static class ModelManager
     /// Return random building id with specified type
     /// </summary>
     /// <param name="type">building type</param>
-    public static string GetRandomBuilding(BuildingType type)
+    public static BuildingID GetRandomBuilding(BuildingType type)
     {
+        BuildingID id;
+        id.type = type;
+        id.id = 0;
         switch (type)
         {
             case BuildingType.Residential:
-                return "r" + Random.Range(1, 22);
+                id.id = (ushort)Random.Range(1, 22);
+                break;
             case BuildingType.Commercial:
-                return "c" + Random.Range(1, 20);
+                id.id = (ushort)Random.Range(1, 20);
+                break;
             case BuildingType.Industrial:
-                return "i";
+                break;
         }
-        return "";
+        return id;
     }
 
     /// <summary>
-    /// Validates building id and converts it to directory
+    /// Obtain directory from building id
     /// </summary>
     /// <param name="id"></param>
     /// <returns>If vaild id, returns directory of building, if invaild id, returns null</returns>
-    static string ValidateID(string id)
+    static string GetDirectory(BuildingID id)
     {
-        string _directory = "building (" + id.Remove(0, 1) + ")";
-        if (id[0] == 'r')
+        string _directory = "building (" + id.id + ")";
+        switch (id.type)
         {
-            _directory = residentialDir + _directory;
-        }
-        else if (id[0] == 'c')
-        {
-            _directory = commercialDir + _directory;
-        }
-        else if (id[0] == 'i')
-        {
-            _directory = industrialDir + _directory;
-        }
-        else
-        {
-            Debug.LogError("Incorrect format of building ID, expected character r/c/i followed by number get: '" + id + "'");
-            return null;
+            case BuildingType.Residential:
+                _directory = residentialDir + _directory;
+                break;
+            case BuildingType.Commercial:
+                _directory = commercialDir + _directory;
+                break;
+            case BuildingType.Industrial:
+                _directory = industrialDir + _directory;
+                break;
+            default:
+                Debug.LogError("Incorrect format of building ID, expected character r/c/i followed by number get: '" + id + "'");
+                return null;
         }
         return _directory;
     }
