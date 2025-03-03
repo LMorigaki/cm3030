@@ -160,7 +160,6 @@ public class BuildingCard : Card
     /// <summary>
     /// sets adjacent bonus of a card by given building
     /// </summary>
-    /// <param name="buildingID">building id</param>
     void SetAdjacentBonus()
     {
         switch (buildingID.type)
