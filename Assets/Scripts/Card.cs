@@ -137,7 +137,7 @@ public class BuildingCard : Card
         this.upkeep = 0;
         this.profit = 0;
         this.buildingID = id;
-        SetAdjacentBonus();
+        Initialise();
     }
 
     /// <summary>
@@ -152,15 +152,13 @@ public class BuildingCard : Card
             "Builds a " + type.ToString().ToLower() + " building",
             buildingID
             );
-        card.upkeep = 10;
-        card.profit = 20;
         return card;
     }
 
     /// <summary>
-    /// sets adjacent bonus of a card by given building
+    /// sets profit, upkeep and adjacent bonus of a card
     /// </summary>
-    void SetAdjacentBonus()
+    void Initialise()
     {
         switch (buildingID.type)
         {
@@ -203,6 +201,8 @@ public class BuildingCard : Card
                             )
                         };
                         this.bonus = _bonus;
+                        this.upkeep = 10;
+                        this.profit = 20;
                         return;
                 }
                 break;
