@@ -1,4 +1,8 @@
-﻿/// <summary>
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
 /// Possible types of cards
 /// </summary>
 public enum CardType
@@ -7,6 +11,9 @@ public enum CardType
     Event
 }
 
+/// <summary>
+/// possible types of adjacent and event bonus
+/// </summary>
 public enum BonusType
 {
     RatioUpkeep,
@@ -16,7 +23,7 @@ public enum BonusType
 }
 
 /// <summary>
-/// represent a bonus provided by a building
+/// represents a bonus provided by a building
 /// </summary>
 public struct Bonus
 {
@@ -50,6 +57,36 @@ public struct Bonus
 }
 
 /// <summary>
+/// represents a event bonus
+/// </summary>
+public struct EventBonus
+{
+    /// <summary>
+    /// type of bonus
+    /// </summary>
+    public BonusType type;
+    /// <summary>
+    /// building type of target which is this bonus applied to
+    /// </summary>
+    public BuildingType[] targetTypes;
+    /// <summary>
+    /// value of effect of bonus
+    /// </summary>
+    public float value;
+    /// <summary>
+    /// number of turns the effect last for
+    /// </summary>
+    public byte turns;
+    public EventBonus(BonusType type, BuildingType[] targetTypes, float value, byte turns)
+    {
+        this.type = type;
+        this.targetTypes = targetTypes;
+        this.value = value;
+        this.turns = turns;
+    }
+}
+
+/// <summary>
 /// Class for storing variables of a card
 /// </summary>
 public class Card
@@ -74,12 +111,12 @@ public class BuildingCard : Card
     /// basic upkeep of this building<br/>
     /// total upkeep = upkeeps * (1 + ratio upkeeps) + fixed upkeeps
     /// </summary>
-    public int upkeep;
+    public short upkeep;
     /// <summary>
     /// basic profit of this building<br/>
     /// total profit = profits * (1 + ratio bonus) + fixed bonus
     /// </summary>
-    public int profit;
+    public short profit;
     /// <summary>
     /// list of all adjacent bonus provided by this card/building
     /// </summary>
@@ -124,7 +161,7 @@ public class BuildingCard : Card
     /// sets adjacent bonus of a card by given building
     /// </summary>
     /// <param name="buildingID">building id</param>
-    public void SetAdjacentBonus()
+    void SetAdjacentBonus()
     {
         switch (buildingID.type)
         {
@@ -189,18 +226,50 @@ public class BuildingCard : Card
 
 public class EventCard : Card
 {
+    public static readonly int eventCount = 0;
+
     /// <summary>
     /// ID of event
     /// </summary>
-    public int? eventID;
+    public byte? eventID;
     /// <summary>
     /// Type of card
     /// </summary>
     public new readonly CardType type = CardType.Event;
 
+    public EventBonus eventBonus;
+
     public EventCard(string title, string description)
     {
         this.title = title;
         this.description = description;
+    }
+
+    public static EventCard RandomEventCard()
+    {
+        int id = Random.Range(1, eventCount);
+        switch (id)
+        {
+            case 1:
+                // increase profit form all buildings for 20% in 2 turns
+                EventCard eventCard = new EventCard("Tax increase", 
+                    "Increase profit from all building for 20 % in 2 turns");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.RatioBonus,
+                        new BuildingType[]{
+                            BuildingType.Residential,
+                            BuildingType.Commercial,
+                            BuildingType.Industrial
+                        },
+                        20,
+                        2
+                    );
+
+                return eventCard;
+            default:
+                Debug.LogError("Undefined event card was created");
+                break;
+        }
+        return null;
     }
 }

@@ -26,6 +26,34 @@ struct BonusTable
 }
 
 /// <summary>
+/// a table storing event bonus
+/// </summary>
+struct EventBonusTable
+{
+    private float[,] bonuses;
+
+    public EventBonusTable(float defaultValue = 0)
+    {
+        bonuses = new float[4, 3];
+    }
+
+    public float Get(BonusType bonusType, BuildingType buildingType)
+    {
+        return bonuses[(int)bonusType, (int)buildingType];
+    }
+
+    public void Add(BonusType bonusType, BuildingType buildingType, float value)
+    {
+        bonuses[(int)bonusType, (int)buildingType] += value;
+    }
+
+    public void Remove(BonusType bonusType, BuildingType buildingType, float value)
+    {
+        bonuses[(int)bonusType, (int)buildingType] -= value;
+    }
+}
+
+/// <summary>
 /// stores and provide functions about buildings, upkeeps, profits and adjacent bonus info on board
 /// </summary>
 public class Board
@@ -33,7 +61,7 @@ public class Board
     /// <summary>
     /// size of the board
     /// </summary>
-    readonly int boardSize;
+    readonly byte boardSize;
     /// <summary>
     /// placeable objects on board
     /// </summary>
@@ -43,28 +71,26 @@ public class Board
     /// </summary>
     BuildingCard[,] buildingCards;
     /// <summary>
-    /// basic upkeep of each tile<br/>
-    /// total upkeep = upkeeps * (1 + ratio upkeeps) + fixed upkeeps
+    /// list of active event cards
     /// </summary>
-    int[,] upkeeps;
-    /// <summary>
-    /// basic profit of each tile<br/>
-    /// total profit = profits * (1 + ratio bonus) + fixed bonus
-    /// </summary>
-    int[,] profits;
+    List<EventCard> eventCards;
     /// <summary>
     /// a table storing all adjacent bonus from all buildings
     /// </summary>
     BonusTable bonusTable;
+    /// <summary>
+    /// a table storing all applied event bonus
+    /// </summary>
+    EventBonusTable eventBonusTable;
 
-    public Board(int size)
+    public Board(byte size)
     {
         boardSize = size;
         tiles = new GameObject[size, size];
         buildingCards = new BuildingCard[size, size];
-        upkeeps = new int[size, size];
-        profits = new int[size, size];
+        eventCards = new List<EventCard>();
         bonusTable = new BonusTable(size);
+        eventBonusTable = new EventBonusTable();
     }
 
     /// <summary>
@@ -77,24 +103,33 @@ public class Board
         tiles[index.x, index.y] = building;
         buildingCards[index.x, index.y] = card;
 
-        // assigns upkeep and profit values
-        upkeeps[index.x, index.y] = card.upkeep;
-        profits[index.x, index.y] = card.profit;
         // updates adjacent bonus
         for (int i = 0; i < card.bonus.Length; i++)
         {
-            ApplyMatrix(card.bonus[i], index);
+            ApplyBonus(card.bonus[i], index);
         }
     }
 
     /// <summary>
-    /// adds the values from matrix to a target array at specified location
+    /// add event bonus to event bonus table
     /// </summary>
-    /// <param name="matrix">array from card</param>
-    /// <param name="target">target array in board</param>
+    /// <param name="card"></param>
+    public void ApplyEvent(EventCard card)
+    {
+        eventCards.Add(card);
+        for (int i = 0; i < card.eventBonus.targetTypes.Length; i++)
+        {
+            eventBonusTable.Add(card.eventBonus.type, card.eventBonus.targetTypes[i], card.eventBonus.value);
+        }
+    }
+
+    /// <summary>
+    /// add or remove adjacent bonus to bonus table
+    /// </summary>
+    /// <param name="bonus">adjacent bonus form card</param>
     /// <param name="index">location of building, converted to array index</param>
     /// <param name="isReduction">if true, removes the value of matrix from target array</param>
-    void ApplyMatrix(Bonus bonus, Vector2Int index, bool isReduction = false)
+    void ApplyBonus(Bonus bonus, Vector2Int index, bool isReduction = false)
     {
         int fromX = index.x - Mathf.FloorToInt(bonus.targets.GetLength(0) / 2);
         int fromY = index.y - Mathf.FloorToInt(bonus.targets.GetLength(1) / 2);
@@ -121,20 +156,23 @@ public class Board
             }
         }
     }
-
-    /*
+  
     /// <summary>
     /// calculates the total upkeep of buildings on board
     /// </summary>
     public float TotalUpkeep()
     {
-        // upkeeps[i, j] * (1 + ratio bonus) + fixed bonus
+        // upkeeps[i, j] * (1 + ratio bonus + event ratio bonus) + fixed bonus + event fixed bonus
         float sum = 0;
         for (int i = 0; i < boardSize; i++)
         {
             for (int j = 0; j < boardSize; j++)
             {
-                sum += upkeeps[i, j] * (1 + ratioUpkeeps[i, j]) + fixedUpkeeps[i, j];
+                sum += buildingCards[i, j].upkeep * 
+                (1 + bonusTable.Get(BonusType.RatioUpkeep, i, j, buildingCards[i, j].buildingID.type) + 
+                eventBonusTable.Get(BonusType.RatioUpkeep, buildingCards[i, j].buildingID.type)) +
+                bonusTable.Get(BonusType.FixedUpkeep, i, j, buildingCards[i, j].buildingID.type) + 
+                eventBonusTable.Get(BonusType.FixedUpkeep, buildingCards[i, j].buildingID.type);
             }
         }
         return sum;
@@ -150,13 +188,16 @@ public class Board
         {
             for (int j = 0; j < boardSize; j++)
             {
-                sum += profits[i, j] * (1 + ratioBonus[i, j]) + fixedBonus[i, j];
+                sum += buildingCards[i, j].profit * 
+                (1 + bonusTable.Get(BonusType.RatioBonus, i, j, buildingCards[i, j].buildingID.type) + 
+                eventBonusTable.Get(BonusType.RatioBonus, buildingCards[i, j].buildingID.type)) +
+                bonusTable.Get(BonusType.FixedBonus, i, j, buildingCards[i, j].buildingID.type) + 
+                eventBonusTable.Get(BonusType.FixedBonus, buildingCards[i, j].buildingID.type);
             }
         }
         return sum;
     }
-    */
-
+    
     /// <summary>
     /// returns true if a tile is occupied
     /// </summary>
@@ -165,6 +206,29 @@ public class Board
     {
         Vector2Int index = CellToIndex(location);
         return tiles[index.x, index.y] != null;
+    }
+
+    /// <summary>
+    /// removes all expired event bonus
+    /// </summary>
+    public void RemoveEventBonus()
+    {
+        for (int i = eventCards.Count - 1; i >= 0; i--)
+        {
+            if (eventCards[i].eventBonus.turns == 0)
+            {
+                for (int j = 0; j < eventCards[i].eventBonus.targetTypes.Length; j++)
+                {
+                    eventBonusTable.Remove
+                    (
+                        eventCards[i].eventBonus.type,
+                        eventCards[i].eventBonus.targetTypes[j],
+                        eventCards[i].eventBonus.value
+                    );
+                }
+                eventCards.RemoveAt(i);
+            }
+        }
     }
 
     /// <summary>

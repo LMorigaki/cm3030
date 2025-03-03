@@ -11,13 +11,13 @@ public class CardBehaviour : MonoBehaviour
     /// <summary>
     /// Card info of this card object
     /// </summary>
-    public BuildingCard card;
+    public Card card;
 
     /// <summary>
     /// Initialize child objects base on given card info
     /// </summary>
     /// <param name="card"></param>
-    public void SetCardInfo(BuildingCard card)
+    public void SetCardInfo(Card card)
     {
         this.card = card;
         Transform _cardButton = transform.Find("CardButton");
@@ -30,7 +30,7 @@ public class CardBehaviour : MonoBehaviour
         if (card.type == CardType.Building)
         {
             GameObject _image = _cardButton.Find("Image").gameObject;
-            _image.GetComponent<Image>().sprite = ModelManager.LoadImage(card.buildingID);
+            _image.GetComponent<Image>().sprite = ModelManager.LoadImage(((BuildingCard)card).buildingID);
         }
         transform.Find("CardButton").GetComponent<Button>().interactable = true;
     }

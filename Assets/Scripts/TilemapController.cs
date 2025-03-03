@@ -8,19 +8,20 @@ using UnityEngine.EventSystems;
 
 public class TilemapController : MonoBehaviour
 {
-    public int boardSize;
+    public byte boardSize;
 	public Camera cam;
 	public EventSystem inputEventSystem;
     public TileBase fillTile;
     public TileBase highlightTile;
     public readonly Vector3Int buildingOffset = new Vector3Int(5, 0, 5);
+    public Board board;
 
     public event EventHandler<Vector3Int?> TileHighlighted;
     public event EventHandler<Vector3Int?> TileSelected;
 
     private Tilemap tilemap;
 	private Vector3Int? higTile = null;
-    Board board;
+    
 
     void Start()
     {
@@ -113,7 +114,6 @@ public class TilemapController : MonoBehaviour
                 int index = (x * size.y) + y;
                 positions[index] = cellLoc + new Vector3Int(y, x, 0);
                 tiles[index] = fillTile;
-                Debug.Log(positions[index]);
             }
         }
         

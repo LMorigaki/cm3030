@@ -44,7 +44,7 @@ public class Placeable : MonoBehaviour
         offsetRotation = Vector3.right * transform.localScale.y;
 
         // load and assign building as child of this object
-        structure = ModelManager.LoadStructure(cardBehaviour.card.buildingID);
+        structure = ModelManager.LoadStructure(((BuildingCard)cardBehaviour.card).buildingID);
         Instantiate<GameObject>(structure, transform);
         // save original materials of building and assign transparent meterial
         meshRenderer = GetComponentInChildren<Renderer>();
@@ -84,7 +84,8 @@ public class Placeable : MonoBehaviour
 		
         transform.position = tilemap.CellWorldPosition(cellPos.Value) + posOffset;
 
-		bool canPlace = tilemap.CanPlace(cellPos.Value, Size);
+        //bool canPlace = tilemap.CanPlace(cellPos.Value, Size);
+        bool canPlace = !tilemap.board.Occupied(cellPos.Value);
         // reduce assignment of materials
         if (canPlace != displayPlaceable)
         {
@@ -103,7 +104,11 @@ public class Placeable : MonoBehaviour
 
     void OnPlace(Vector3Int? cellPos)
     {
-        
+        if (tilemap.board.Occupied(cellPos.Value))
+        {
+            return;
+        }
+
         // paint tiles in location
         Location = tilemap.PlaceTile(cellPos.Value, Size);
 
@@ -122,7 +127,7 @@ public class Placeable : MonoBehaviour
         meshRenderer.materials = materials;
 
         GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
-        tilemap.OnPlace(gameObject, cardBehaviour.card, cellPos.Value);
+        tilemap.OnPlace(gameObject, (BuildingCard)(cardBehaviour.card), cellPos.Value);
         cardBehaviour.OnPlace();
         cardBehaviour = null;
     }
