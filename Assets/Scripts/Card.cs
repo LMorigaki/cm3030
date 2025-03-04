@@ -23,6 +23,29 @@ public enum BonusType
 }
 
 /// <summary>
+/// possible types of affective range of bonus
+/// </summary>
+public enum BonusRange
+{
+    /// <summary>
+    /// bonus applies to desinated adjacent positions
+    /// </summary>
+    Adjacent,
+    /// <summary>
+    /// bonus applies to all at same horizontal line
+    /// </summary>
+    Horizontal,
+    /// <summary>
+    /// bonus applies to all at same vertical line
+    /// </summary>
+    Vertical,
+    /// <summary>
+    /// bonus applies to all on board
+    /// </summary>
+    Board
+}
+
+/// <summary>
 /// represents a bonus provided by a building
 /// </summary>
 public struct Bonus
@@ -36,6 +59,10 @@ public struct Bonus
     /// </summary>
     public BuildingType[] targetTypes;
     /// <summary>
+    /// affective range of bonus
+    /// </summary>
+    public BonusRange range;
+    /// <summary>
     /// relative location from original building and attenuation of bouns<br/>
     /// 0 means building at the position will not gain bonus<br/>
     /// 1 means building at the position will gain 100% effect of bonus<br/>
@@ -47,10 +74,11 @@ public struct Bonus
     /// value of effect of bonus
     /// </summary>
     public float value;
-    public Bonus(BonusType type, BuildingType[] targetTypes, float[,] targets, float value)
+    public Bonus(BonusType type, BuildingType[] targetTypes, BonusRange range, float[,] targets, float value)
     {
         this.type = type;
         this.targetTypes = targetTypes;
+        this.range = range;
         this.targets = targets;
         this.value = value;
     }
@@ -175,6 +203,7 @@ public class BuildingCard : Card
                             (
                                 BonusType.RatioUpkeep,
                                 new BuildingType[] { BuildingType.Residential },
+                                BonusRange.Adjacent,
                                 new float[,] {
                                                 {0, 1, 0},
                                                 {1, 0, 1},
@@ -190,6 +219,7 @@ public class BuildingCard : Card
                             (
                                 BonusType.RatioBonus,
                                 new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
                                 new float[,] {
                                                 {   0,    0, 0.5f,    0,    0},
                                                 {   0, 0.5f,    1, 0.5f,    0},
@@ -215,6 +245,7 @@ public class BuildingCard : Card
                             (
                                 BonusType.FixedUpkeep,
                                 new BuildingType[] { BuildingType.Residential },
+                                BonusRange.Adjacent,
                                 new float[,] {
                                                 {0, 1, 0},
                                                 {1, 0, 1},
@@ -230,6 +261,7 @@ public class BuildingCard : Card
                             (
                                 BonusType.FixedBonus,
                                 new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
                                 new float[,] {
                                                 {0, 1, 0},
                                                 {1, 0, 1},
@@ -256,6 +288,7 @@ public class BuildingCard : Card
                             (
                                 BonusType.FixedBonus,
                                 new BuildingType[] { BuildingType.Residential },
+                                BonusRange.Adjacent,
                                 new float[,] {
                                                 {0, 1, 0},
                                                 {1, 0, 1},
@@ -268,6 +301,7 @@ public class BuildingCard : Card
                             (
                                 BonusType.RatioBonus,
                                 new BuildingType[] { BuildingType.Residential },
+                                BonusRange.Adjacent,
                                 new float[,] {
                                                 {   0,    0, 1,    0,    0},
                                                 {   0, 1,   -1, 1,    0},
@@ -297,6 +331,7 @@ public class BuildingCard : Card
                             (
                                 BonusType.RatioBonus,
                                 new BuildingType[] { BuildingType.Residential },
+                                BonusRange.Adjacent,
                                 new float[,] {
                                                 {0.5f, 1, 0.5f},
                                                 {1, 0, 1},

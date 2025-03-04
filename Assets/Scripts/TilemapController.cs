@@ -15,6 +15,7 @@ public class TilemapController : MonoBehaviour
     public TileBase highlightTile;
     public readonly Vector3Int buildingOffset = new Vector3Int(5, 0, 5);
     public Board board;
+    public GameFlowController flowController;
 
     public event EventHandler<Vector3Int?> TileHighlighted;
     public event EventHandler<Vector3Int?> TileSelected;
@@ -125,5 +126,6 @@ public class TilemapController : MonoBehaviour
     public void OnPlace(GameObject building, BuildingCard card, Vector3Int location)
     {
         board.InsertBuilding(building, card, location);
+        flowController.OnBoardChange();
     }
 }
