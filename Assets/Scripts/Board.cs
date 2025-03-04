@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// a table storing all adjacent bonus from all buildings
+/// a table storing all bonus from all buildings
 /// </summary>
 struct BonusTable
 {
@@ -32,9 +32,9 @@ struct EventBonusTable
 {
     private float[,] bonuses;
 
-    public EventBonusTable(float defaultValue = 0)
+    public EventBonusTable(int x, int y)
     {
-        bonuses = new float[4, 3];
+        bonuses = new float[x, y];
     }
 
     public float Get(BonusType bonusType, BuildingType buildingType)
@@ -90,7 +90,7 @@ public class Board
         buildingCards = new BuildingCard[size, size];
         eventCards = new List<EventCard>();
         bonusTable = new BonusTable(size);
-        eventBonusTable = new EventBonusTable();
+        eventBonusTable = new EventBonusTable(4, 3);
     }
 
     /// <summary>
@@ -108,6 +108,23 @@ public class Board
         {
             ApplyBonus(card.bonus[i], index);
         }
+    }
+
+    /// <summary>
+    /// remove a building on board and all bonus from the building
+    /// </summary>
+    /// <param name="location">cell location of building</param>
+    public void RemoveBuilding(Vector3Int location)
+    {
+        Vector2Int index = CellToIndex(location);
+        BuildingCard card = buildingCards[index.x, index.y];
+
+        for (int i = 0; i < card.bonus.Length; i++)
+        {
+            ApplyBonus(card.bonus[i], index, true);
+        }
+        buildingCards[index.x, index.y] = null;
+        tiles[index.x, index.y] = null;
     }
 
     /// <summary>
@@ -131,29 +148,79 @@ public class Board
     /// <param name="isReduction">if true, removes the value of matrix from target array</param>
     void ApplyBonus(Bonus bonus, Vector2Int index, bool isReduction = false)
     {
-        int fromX = index.x - Mathf.FloorToInt(bonus.targets.GetLength(0) / 2);
-        int fromY = index.y - Mathf.FloorToInt(bonus.targets.GetLength(1) / 2);
-
-        for (int i = 0; i < bonus.targets.GetLength(0); i++)
+        switch (bonus.range)
         {
-            for (int j = 0; j < bonus.targets.GetLength(1); j++)
-            {
-                int x = fromX + i;
-                int y = fromY + j;
-                if (x < 0 || x >= boardSize || y < 0 || y >= boardSize)
+            case BonusRange.Adjacent:
+                int fromX = index.x - Mathf.FloorToInt(bonus.targets.GetLength(0) / 2);
+                int fromY = index.y - Mathf.FloorToInt(bonus.targets.GetLength(1) / 2);
+
+                for (int i = 0; i < bonus.targets.GetLength(0); i++)
                 {
-                    continue;
+                    for (int j = 0; j < bonus.targets.GetLength(1); j++)
+                    {
+                        int x = fromX + i;
+                        int y = fromY + j;
+                        if (x < 0 || x >= boardSize || y < 0 || y >= boardSize)
+                        {
+                            continue;
+                        }
+                        float value = bonus.targets[i, j] * bonus.value;
+                        if (isReduction)
+                        {
+                            value = value * -1;
+                        }
+                        for (int k = 0; k < bonus.targetTypes.Length; k++)
+                        {
+                            bonusTable.Set(bonus.type, x, y, bonus.targetTypes[k], value);
+                        }
+                    }
                 }
-                float value = bonus.targets[i, j] * bonus.value;
-                if (isReduction)
+                break;
+            case BonusRange.Horizontal:
+                for (int i = 0; i < boardSize; i++)
                 {
-                    value = value * -1;
+                    float value = bonus.value;
+                    if (isReduction)
+                    {
+                        value = value * -1;
+                    }
+                    for (int k = 0; k < bonus.targetTypes.Length; k++)
+                    {
+                        bonusTable.Set(bonus.type, i, index.y, bonus.targetTypes[k], value);
+                    }
                 }
-                for (int k = 0; k < bonus.targetTypes.Length; k++)
+                break;
+            case BonusRange.Vertical:
+                for (int i = 0; i < boardSize; i++)
                 {
-                    bonusTable.Set(bonus.type, x, y, bonus.targetTypes[k], bonus.value);
+                    float value = bonus.value;
+                    if (isReduction)
+                    {
+                        value = value * -1;
+                    }
+                    for (int k = 0; k < bonus.targetTypes.Length; k++)
+                    {
+                        bonusTable.Set(bonus.type, index.x, i, bonus.targetTypes[k], value);
+                    }
                 }
-            }
+                break;
+            case BonusRange.Board:
+                for (int i = 0; i < boardSize; i++)
+                {
+                    for (int j = 0; j < boardSize; j++)
+                    {
+                        float value = bonus.value;
+                        if (isReduction)
+                        {
+                            value = value * -1;
+                        }
+                        for (int k = 0; k < bonus.targetTypes.Length; k++)
+                        {
+                            bonusTable.Set(bonus.type, i, j, bonus.targetTypes[k], value);
+                        }
+                    }
+                }
+                break;
         }
     }
   
@@ -168,6 +235,10 @@ public class Board
         {
             for (int j = 0; j < boardSize; j++)
             {
+                if (buildingCards[i, j] == null)
+                {
+                    continue;
+                }
                 sum += buildingCards[i, j].upkeep * 
                 (1 + bonusTable.Get(BonusType.RatioUpkeep, i, j, buildingCards[i, j].buildingID.type) + 
                 eventBonusTable.Get(BonusType.RatioUpkeep, buildingCards[i, j].buildingID.type)) +
@@ -188,6 +259,10 @@ public class Board
         {
             for (int j = 0; j < boardSize; j++)
             {
+                if (buildingCards[i, j] == null)
+                {
+                    continue;
+                }
                 sum += buildingCards[i, j].profit * 
                 (1 + bonusTable.Get(BonusType.RatioBonus, i, j, buildingCards[i, j].buildingID.type) + 
                 eventBonusTable.Get(BonusType.RatioBonus, buildingCards[i, j].buildingID.type)) +
@@ -209,12 +284,13 @@ public class Board
     }
 
     /// <summary>
-    /// removes all expired event bonus
+    /// reduce effective turn count and removes all expired event bonus
     /// </summary>
-    public void RemoveEventBonus()
+    public void StepAndRemoveEventBonus()
     {
         for (int i = eventCards.Count - 1; i >= 0; i--)
         {
+            eventCards[i].eventBonus.turns--;
             if (eventCards[i].eventBonus.turns == 0)
             {
                 for (int j = 0; j < eventCards[i].eventBonus.targetTypes.Length; j++)
