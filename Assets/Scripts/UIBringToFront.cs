@@ -11,7 +11,8 @@ public class UIBringToFront : MonoBehaviour {
 	Transform folder;
 
 
-	void Start() {
+	public void Initialise()
+	{
         originalPos = target.transform.GetSiblingIndex();
 		empty = new GameObject();
 		

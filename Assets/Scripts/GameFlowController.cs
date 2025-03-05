@@ -33,6 +33,8 @@ public class GameFlowController : MonoBehaviour
         cash = 1000;
         UpdateTexts();
         DisplayTurn.text = "Round: " + currentTurn + "/" + maxTurns;
+        deckController.InsertRandomCards();
+        deckController.FanCards();
     }
 
     // Start is called before the first frame update
@@ -61,6 +63,7 @@ public class GameFlowController : MonoBehaviour
         targetIncome = GetNewTarget(currentTurn);
         BtnNextTurn.interactable = true;
         UpdateTexts();
+        deckController.FanCards();
         timer = StartCoroutine(UpdateTime());
     }
 

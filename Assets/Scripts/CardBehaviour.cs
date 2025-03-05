@@ -13,6 +13,16 @@ public class CardBehaviour : MonoBehaviour
     /// </summary>
     public Card card;
 
+    [HideInInspector]
+    /// <summary>
+    /// if this card is displaying in shop
+    /// </summary>
+    public bool inShop = false;
+
+    public Animator animator;
+    public UIBringToFront bringToFront;
+    public Button button;
+
     /// <summary>
     /// Initialize child objects base on given card info
     /// </summary>
@@ -31,6 +41,10 @@ public class CardBehaviour : MonoBehaviour
         {
             GameObject _image = _cardButton.Find("Image").gameObject;
             _image.GetComponent<Image>().sprite = ModelManager.LoadImage(((BuildingCard)card).buildingID);
+        }
+        if (card.type == CardType.Event)
+        {
+
         }
         transform.Find("CardButton").GetComponent<Button>().interactable = true;
     }
@@ -58,29 +72,48 @@ public class CardBehaviour : MonoBehaviour
     /// </summary>
     public void OnClick()
     {
-        // On click handle starts here
-        switch (card.type)
+        if (inShop)
         {
-            case CardType.Building:
-                // instantiate placeable object
-                GameObject placeable = Resources.Load<GameObject>("Prefabs/Placeable");
-                placeable.GetComponent<Placeable>().cardBehaviour = this;
-                Transform folder = GameObject.FindGameObjectWithTag("BuildingFolder").transform;
-                Instantiate<GameObject>(placeable, folder);
-                // hide card deck
-                GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().HideDeck();
-
-                // comfirm place building
-                //      call remove()
-                // cancel place building
-                //      destroy placeable
-                //      show card deck
-                break;
-            case CardType.Event:
-                break;
-            default:
-                break;
+            DeckController deckController = GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>();
+            deckController.InsertFromShop(gameObject);
         }
+        else
+        {
+            switch (card.type)
+            {
+                case CardType.Building:
+                    // instantiate placeable object
+                    GameObject placeable = Resources.Load<GameObject>("Prefabs/Placeable");
+                    placeable.GetComponent<Placeable>().cardBehaviour = this;
+                    Transform folder = GameObject.FindGameObjectWithTag("BuildingFolder").transform;
+                    Instantiate<GameObject>(placeable, folder);
+                    // hide card deck
+                    GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().HideDeck();
+
+                    // comfirm place building
+                    //      call remove()
+                    // cancel place building
+                    //      destroy placeable
+                    //      show card deck
+                    break;
+                case CardType.Event:
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+    }
+
+    /// <summary>
+    /// activate hebaviour when card is in deck
+    /// </summary>
+    public void Activate()
+    {
+        animator.enabled = true;
+        bringToFront.enabled = true;
+        bringToFront.Initialise();
+        GameObject.Find("EventSystem").GetComponent<UnityEngine.EventSystems.EventSystem>().SetSelectedGameObject(null);
     }
 
     /// <summary>
@@ -109,10 +142,17 @@ public class CardBehaviour : MonoBehaviour
 
     private void OnDestroy()
     {
-        GameObject deck = GameObject.FindGameObjectWithTag("DeckFolder");
-        if (deck != null)
+        if (inShop)
         {
-            deck.GetComponent<DeckController>().FanCards();
+
+        }
+        else
+        {
+            GameObject deck = GameObject.FindGameObjectWithTag("DeckFolder");
+            if (deck != null)
+            {
+                deck.GetComponent<DeckController>().FanCards();
+            }
         }
     }
 

@@ -4,13 +4,21 @@ using UnityEngine;
 
 public class DeckController : MonoBehaviour
 {
+    public readonly int maxCardCount = 6;
+    GameObject card;
     GameObject cardContainer;
     UnityEngine.UI.Selectable selectable;
 
-    private void Start()
+    private void Awake()
     {
+        card = Resources.Load<GameObject>("Prefabs/CardButton");
         cardContainer = transform.Find("CardsContainer").gameObject;
         selectable = GetComponent<UnityEngine.UI.Selectable>();
+    }
+
+    private void Start()
+    {
+        
     }
 
     public void ShowDeck()
@@ -24,6 +32,30 @@ public class DeckController : MonoBehaviour
     }
 
     // insert random cards
+    public void InsertRandomCards(int? amount = null)
+    {
+        if (amount == null)
+        {
+            amount = maxCardCount - cardContainer.transform.childCount;
+        }
+        for (int i = 0; i < (int)amount; i++)
+        {
+            BuildingCard _card = BuildingCard.RandomBuildingCard();
+            GameObject newcard = GameObject.Instantiate(card, cardContainer.transform);
+            newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
+            newcard.GetComponent<CardBehaviour>().Activate();
+        }
+    }
+
+    /// <summary>
+    /// Moves a card object from shop to card deck
+    /// </summary>
+    public void InsertFromShop(GameObject cardObject)
+    {
+        cardObject.transform.parent = cardContainer.transform;
+        cardObject.GetComponent<CardBehaviour>().Activate();
+        FanCards();
+    }
 
     // remove cards
 

@@ -153,15 +153,12 @@ public class BuildingCard : Card
     /// ID of building model in asset database<br/>
     /// </summary>
     public BuildingID buildingID;
-    /// <summary>
-    /// Type of card
-    /// </summary>
-    public new readonly CardType type = CardType.Building;
 
     public BuildingCard(string title, string description, BuildingID id)
     {
         this.title = title;
         this.description = description;
+        this.type = CardType.Building;
         this.upkeep = 0;
         this.profit = 0;
         this.buildingID = id;
@@ -369,16 +366,12 @@ public class BuildingCard : Card
 
 public class EventCard : Card
 {
-    public static readonly int eventCount = 0;
+    public static readonly int eventCount = 1;
 
     /// <summary>
     /// ID of event
     /// </summary>
     public byte? eventID;
-    /// <summary>
-    /// Type of card
-    /// </summary>
-    public new readonly CardType type = CardType.Event;
 
     public EventBonus eventBonus;
 
@@ -386,11 +379,12 @@ public class EventCard : Card
     {
         this.title = title;
         this.description = description;
+        this.type = CardType.Event;
     }
 
     public static EventCard RandomEventCard()
     {
-        int id = Random.Range(1, eventCount);
+        byte id = (byte)Random.Range(1, eventCount);
         switch (id)
         {
             case 1:
@@ -407,7 +401,6 @@ public class EventCard : Card
                         20,
                         2
                     );
-
                 return eventCard;
             default:
                 Debug.LogError("Undefined event card was created");
