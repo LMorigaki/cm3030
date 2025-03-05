@@ -24,7 +24,7 @@ public class TilemapController : MonoBehaviour
 	private Vector3Int? higTile = null;
     
 
-    void Start()
+    void Awake()
     {
         board = new Board(boardSize);
         tilemap = GetComponentInChildren<Tilemap>();

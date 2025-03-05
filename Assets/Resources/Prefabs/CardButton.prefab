@@ -248,7 +248,7 @@ GameObject:
   - component: {fileID: 9019848084179048439}
   m_Layer: 5
   m_Name: CardButton
-  m_TagString: Untagged
+  m_TagString: Card
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -308,6 +308,7 @@ MonoBehaviour:
   inShop: 0
   animator: {fileID: 6555255010924142395}
   bringToFront: {fileID: 6555255010924142399}
+  button: {fileID: 0}
 --- !u!1 &6555255010924142389
 GameObject:
   m_ObjectHideFlags: 0

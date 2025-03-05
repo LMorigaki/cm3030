@@ -16,6 +16,7 @@ public class GameFlowController : MonoBehaviour
 
     public TilemapController tilemapController;
     public DeckController deckController;
+    public ShopController shopController;
 
     int currentTurn;
     const int maxTurns = 5;
@@ -24,7 +25,22 @@ public class GameFlowController : MonoBehaviour
     /// </summary>
     int time;
     const int maxTime = 120;
-    int cash, income, targetIncome, expenditure;
+    /// <summary>
+    /// the cash in hand
+    /// </summary>
+    int cash;
+    /// <summary>
+    /// the expected income will be obtained at the begin of turn
+    /// </summary>
+    int income;
+    /// <summary>
+    /// the target amount of cash need to be meet at the end of turn
+    /// </summary>
+    int targetCash;
+    /// <summary>
+    /// the expected expenditure will be taken at the end of turn
+    /// </summary>
+    int expenditure;
     Coroutine timer;
 
     void Initialize()
@@ -44,6 +60,8 @@ public class GameFlowController : MonoBehaviour
         OnTurnBegin();
     }
 
+    
+
     // Update is called once per frame
     void Update()
     {
@@ -60,11 +78,13 @@ public class GameFlowController : MonoBehaviour
             OnGameOver();
             return;
         }
-        targetIncome = GetNewTarget(currentTurn);
+        targetCash = GetNewTarget(currentTurn);
         BtnNextTurn.interactable = true;
+        
         UpdateTexts();
-        deckController.FanCards();
         timer = StartCoroutine(UpdateTime());
+        // todo: draw event card
+        StartBuildingPharse();
     }
 
     /// <summary>
@@ -83,10 +103,52 @@ public class GameFlowController : MonoBehaviour
     {
         BtnNextTurn.interactable = false;
         StopCoroutine(timer);
+
+        deckController.RemoveAll();
+
+        cash -= Mathf.FloorToInt(tilemapController.board.TotalUpkeep());
+        if (cash < targetCash)
+        {
+            OnGameOver();
+            return;
+        }
+
         currentTurn++;
         tilemapController.board.StepAndRemoveEventBonus();
         DisplayTurn.text = "Round: " + currentTurn + "/" + maxTurns;
         OnTurnBegin();
+    }
+
+    void StartBuildingPharse()
+    {
+        deckController.ShowDeck();
+        deckController.InsertRandomCards();
+        deckController.FanCards();
+
+        int profit = Mathf.FloorToInt(tilemapController.board.TotalProfit());
+        cash += profit;
+
+        UpdateTexts();
+    }
+
+    void EndBuildingPharse()
+    {
+        deckController.RemoveAll();
+        deckController.HideDeck();
+
+        StartShoppingParse();
+    }
+
+    void StartShoppingParse()
+    {
+        shopController.gameObject.SetActive(true);
+        shopController.InsertRandomCards();
+    }
+
+    public void EndShoppingParse()
+    {
+        shopController.RemovelAll();
+        shopController.gameObject.SetActive(false);
     }
 
     void OnGameOver()
@@ -103,6 +165,17 @@ public class GameFlowController : MonoBehaviour
         expenditure = Mathf.FloorToInt(tilemapController.board.TotalUpkeep());
 
         UpdateTexts();
+
+        StartCoroutine(OnBoardChangeLate());
+    }
+
+    IEnumerator OnBoardChangeLate()
+    {
+        yield return new WaitForEndOfFrame();
+        if (!deckController.HasCard())
+        {
+            EndBuildingPharse();
+        }
     }
 
     /// <summary>
@@ -123,7 +196,7 @@ public class GameFlowController : MonoBehaviour
     void UpdateTexts()
     {
         DisplayCash.text = "Cash: " + cash;
-        DisplayTargetIncome.text = "Target: " + (income - expenditure) + "/" + targetIncome;
+        DisplayTargetIncome.text = "Target: " + targetCash;
         DisplayIncome.text = "Income: " + income;
         DisplayExpenditure.text = "Expenses: " + expenditure;
     }
@@ -133,6 +206,6 @@ public class GameFlowController : MonoBehaviour
     /// </summary>
     int GetNewTarget(int turn)
     {
-        return targetIncome = 200 + turn * 50;
+        return targetCash = 200 + turn * 50;
     }
 }

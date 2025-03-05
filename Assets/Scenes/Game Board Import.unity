@@ -1164,6 +1164,7 @@ MonoBehaviour:
   BtnNextTurn: {fileID: 2112093296}
   tilemapController: {fileID: 972401438}
   deckController: {fileID: 1735637899}
+  shopController: {fileID: 642778913}
 --- !u!1 &439292515
 GameObject:
   m_ObjectHideFlags: 0
@@ -1276,7 +1277,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &642778910
 RectTransform:
   m_ObjectHideFlags: 0

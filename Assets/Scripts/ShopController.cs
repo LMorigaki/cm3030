@@ -50,7 +50,7 @@ public class ShopController : MonoBehaviour
     {
         for (int i = 0; i < cardContainer.transform.childCount; i++)
         {
-            Destroy(cardContainer.transform.GetChild(i));
+            Destroy(cardContainer.transform.GetChild(i).transform);
         }
     }
 
@@ -63,15 +63,4 @@ public class ShopController : MonoBehaviour
         InsertRandomCards();
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        InsertRandomCards();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

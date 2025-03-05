@@ -186,7 +186,8 @@ public class BuildingCard : Card
     /// <returns></returns>
     public static BuildingCard RandomBuildingCard()
     {
-        BuildingType type = (BuildingType)Random.Range(0, System.Enum.GetValues(typeof(BuildingType)).Length);
+        //BuildingType type = (BuildingType)Random.Range(0, System.Enum.GetValues(typeof(BuildingType)).Length);
+        BuildingType type = (BuildingType)Random.Range(0, 2);
         BuildingID buildingID = ModelManager.GetRandomBuilding(type);
         BuildingCard card = new BuildingCard(
             type.ToString(),

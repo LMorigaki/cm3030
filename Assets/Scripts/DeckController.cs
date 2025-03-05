@@ -58,6 +58,18 @@ public class DeckController : MonoBehaviour
     }
 
     // remove cards
+    public void RemoveAll()
+    {
+        for (int i = 0; i < cardContainer.transform.childCount; i++)
+        {
+            Destroy(cardContainer.transform.GetChild(i).gameObject);
+        }
+    }
+
+    public bool HasCard()
+    {
+        return cardContainer.transform.childCount != 0;
+    }
 
     /// <summary>
     /// update layout of cards<br/>

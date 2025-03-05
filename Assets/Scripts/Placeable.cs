@@ -127,6 +127,7 @@ public class Placeable : MonoBehaviour
         meshRenderer.materials = materials;
 
         GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>().ShowDeck();
+        
         tilemap.OnPlace(gameObject, (BuildingCard)(cardBehaviour.card), cellPos.Value);
         cardBehaviour.OnPlace();
         cardBehaviour = null;
