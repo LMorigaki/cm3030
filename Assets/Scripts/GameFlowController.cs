@@ -60,6 +60,7 @@ public class GameFlowController : MonoBehaviour
         }
         targetIncome = GetNewTarget(currentTurn);
         BtnNextTurn.interactable = true;
+        UpdateTexts();
         timer = StartCoroutine(UpdateTime());
     }
 

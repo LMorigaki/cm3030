@@ -184,6 +184,22 @@ public class BuildingCard : Card
     }
 
     /// <summary>
+    /// returns a random building card
+    /// </summary>
+    /// <returns></returns>
+    public static BuildingCard RandomBuildingCard()
+    {
+        BuildingType type = (BuildingType)Random.Range(0, System.Enum.GetValues(typeof(BuildingType)).Length);
+        BuildingID buildingID = ModelManager.GetRandomBuilding(type);
+        BuildingCard card = new BuildingCard(
+            type.ToString(),
+            "Builds a " + type.ToString().ToLower() + " building",
+            buildingID
+            );
+        return card;
+    }
+
+    /// <summary>
     /// sets profit, upkeep and adjacent bonus of a card
     /// </summary>
     void Initialise()
