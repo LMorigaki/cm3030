@@ -6,6 +6,9 @@ using UnityEngine.UI;
 public class DeckController : MonoBehaviour
 {
     public readonly int maxCardCount = 6;
+    /// <summary>
+    /// card prefab
+    /// </summary>
     GameObject card;
     GameObject cardContainer;
     Selectable selectable;

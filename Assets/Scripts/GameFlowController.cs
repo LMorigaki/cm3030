@@ -11,12 +11,12 @@ public class GameFlowController : MonoBehaviour
     public TextMeshProUGUI DisplayCash;
     public TextMeshProUGUI DisplayTargetIncome;
     public TextMeshProUGUI DisplayIncome;
-    public TextMeshProUGUI DisplayExpenditure;
     public Button BtnNextTurn;
     public Button BtnNextPharse;
     public GameObject BtnNextPharseObj;
     public Button BtnShop;
     public GameObject BtnShopObj;
+    public GameObject EventCardDisplayer;
 
     public TilemapController tilemapController;
     public DeckController deckController;
@@ -26,13 +26,18 @@ public class GameFlowController : MonoBehaviour
     {
         public static readonly string drawBuildings = "Draw Buildings";
         public static readonly string drawEvents = "Draw Events";
-        public static readonly string returnCards = "Return Cards";
+        public static readonly string endTurn = "End Turn";
     }
     static class BtnShopText
     {
         public static readonly string showShop = "Show Shop";
         public static readonly string hideShop = "Hide Shop";
     }
+
+    /// <summary>
+    /// card prefab
+    /// </summary>
+    GameObject card;
 
     int currentTurn;
     const int maxTurns = 5;
@@ -63,8 +68,14 @@ public class GameFlowController : MonoBehaviour
     {
         currentTurn = 1;
         cash = 1000;
+        targetCash = cash;
         UpdateTexts();
         DisplayTurn.text = "Round: " + currentTurn + "/" + maxTurns;
+    }
+
+    private void Awake()
+    {
+        card = Resources.Load<GameObject>("Prefabs/CardButton");
     }
 
     // Start is called before the first frame update
@@ -74,17 +85,24 @@ public class GameFlowController : MonoBehaviour
         OnTurnBegin();
     }   
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     /// <summary>
-    /// called before turn begin
+    /// called before turn begin<br/>
+    /// initialise/update variables
     /// </summary>
     public void OnTurnBegin()
     {
+        
+        // collect income from building
+        int profit = Mathf.FloorToInt(tilemapController.board.TotalProfit());
+        cash += profit;
+        // update GUI texts
+        UpdateTexts();
+
+        if (cash < targetCash)
+        {
+            OnGameOver();
+            return;
+        }
         if (currentTurn > maxTurns)
         {
             OnGameOver();
@@ -92,17 +110,13 @@ public class GameFlowController : MonoBehaviour
         }
         // update target cash
         targetCash = GetNewTarget(currentTurn);
-        BtnNextTurn.interactable = true;
-        // collect income from building
-        int profit = Mathf.FloorToInt(tilemapController.board.TotalProfit());
-        cash += profit;
-        // update GUI texts
         UpdateTexts();
         // start timer
         timer = StartCoroutine(UpdateTime());
-
+        BtnNextTurn.interactable = true;
         BtnNextPharse.interactable = true;
         BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>().text = BtnNextPharseText.drawBuildings;
+        BtnNextPharseObj.SetActive(true);
         BtnShop.interactable = false;
         BtnShop.GetComponentInChildren<TextMeshProUGUI>().text = BtnShopText.showShop;
         BtnShopObj.SetActive(false);
@@ -110,6 +124,10 @@ public class GameFlowController : MonoBehaviour
         //StartCoroutine(DrawBuildingCards());
     }
 
+    /// <summary>
+    /// display draw building cards animate
+    /// </summary>
+    /// <returns></returns>
     IEnumerator DrawBuildingCards()
     {
         deckController.ShowDeck();
@@ -124,9 +142,33 @@ public class GameFlowController : MonoBehaviour
         BtnNextPharse.interactable = true;
     }
 
-    void DrawEventCards()
+    /// <summary>
+    /// display draw event cards animate<br/>
+    /// then go to play building cards pharse
+    /// </summary>
+    IEnumerator DrawEventCards()
     {
-        // todo: draw event cards
+        // improve: animation of drawing event cards
+
+        GameObject[] eventCards = new GameObject[3];
+        EventCardDisplayer.SetActive(true);
+        for (int i = 0; i < eventCards.Length; i++)
+        {
+            EventCard _card = EventCard.RandomEventCard();
+            eventCards[i] = GameObject.Instantiate(card, EventCardDisplayer.transform);
+            eventCards[i].GetComponent<CardBehaviour>().SetCardInfo(_card);
+            eventCards[i].GetComponent<CardBehaviour>().SetInteractable(false);
+            tilemapController.board.ApplyEvent(_card);
+            yield return new WaitForSeconds(0.25f);
+        }
+        yield return new WaitForSeconds(1);
+        EventCardDisplayer.SetActive(false);
+        for (int i = 0; i < eventCards.Length; i++)
+        {
+            Destroy(eventCards[i]);
+            eventCards[i] = null;
+        }
+        OnBuildingPharseStart();
     }
 
     void OnBuildingPharseStart()
@@ -140,6 +182,7 @@ public class GameFlowController : MonoBehaviour
 
     IEnumerator OnBuildingPharseStartLate()
     {
+        // prevent multiple click on button
         yield return new WaitForSeconds(0.25f);
         BtnNextPharse.interactable = true;
     }
@@ -170,6 +213,20 @@ public class GameFlowController : MonoBehaviour
         shopController.gameObject.SetActive(true);
     }
 
+    public bool BuyCard(int price)
+    {
+        if (cash >= price)
+        {
+            cash -= price;
+            UpdateTexts();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     void HideShop()
     {
         shopController.gameObject.SetActive(false);
@@ -198,18 +255,15 @@ public class GameFlowController : MonoBehaviour
         BtnNextTurn.interactable = false;
         StopAllCoroutines();
 
-        deckController.RemoveAll();
-
         cash -= Mathf.FloorToInt(tilemapController.board.TotalUpkeep());
-        if (cash < targetCash)
-        {
-            OnGameOver();
-            return;
-        }
-
+        UpdateTexts();
+        
         currentTurn++;
         tilemapController.board.StepAndRemoveEventBonus();
         DisplayTurn.text = "Round: " + currentTurn + "/" + maxTurns;
+
+        // todo: show dialog about turn summary
+
         OnTurnBegin();
     }
 
@@ -220,25 +274,33 @@ public class GameFlowController : MonoBehaviour
         deckController.RemoveAll();
 
         // todo: disable GUI interactions
+        // todo: show dialog about game summary
     }
 
+    /// <summary>
+    /// handle onclick event of next pharse button<br/>
+    /// handles 
+    /// </summary>
     public void OnBtnNextPharseClicked()
     {
         BtnNextPharse.interactable = false;
         TextMeshProUGUI textMesh = BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>();
+        // go to draw building cards pharse
         if (textMesh.text == BtnNextPharseText.drawBuildings)
         {
             textMesh.text = BtnNextPharseText.drawEvents;
             StartCoroutine(DrawBuildingCards());
         }
+        // go to draw event cards pharse
+        // then go to play building cards pharse
         else if (textMesh.text == BtnNextPharseText.drawEvents)
         {
-            textMesh.text = BtnNextPharseText.returnCards;
-            DrawEventCards();
+            textMesh.text = BtnNextPharseText.endTurn;
+            StartCoroutine(DrawEventCards());
             InitialiseShop();
-            OnBuildingPharseStart();
         }
-        else if (textMesh.text == BtnNextPharseText.returnCards)
+        // end play building cards pharse
+        else if (textMesh.text == BtnNextPharseText.endTurn)
         {
             OnBuildingPharseEnd();
         }
@@ -263,6 +325,7 @@ public class GameFlowController : MonoBehaviour
 
     IEnumerator OnBtnShopClickedLate()
     {
+        // prevent multiple click on button
         yield return new WaitForSeconds(0.25f);
         BtnShop.interactable = true;
     }
@@ -276,17 +339,6 @@ public class GameFlowController : MonoBehaviour
         expenditure = Mathf.FloorToInt(tilemapController.board.TotalUpkeep());
 
         UpdateTexts();
-        //execution wait after objects are destroyed
-        StartCoroutine(OnBoardChangeLate());
-    }
-
-    IEnumerator OnBoardChangeLate()
-    {
-        yield return new WaitForEndOfFrame();
-        if (!deckController.HasCard())
-        {
-            OnBuildingPharseEnd();
-        }
     }
 
     /// <summary>
@@ -309,10 +361,10 @@ public class GameFlowController : MonoBehaviour
     /// </summary>
     void UpdateTexts()
     {
+        // improve: show change of value in animation
         DisplayCash.text = "Cash: " + cash;
         DisplayTargetIncome.text = "Target: " + targetCash;
-        DisplayIncome.text = "Income: " + income;
-        DisplayExpenditure.text = "Expenses: " + expenditure;
+        DisplayIncome.text = "Income: " + (income - expenditure);
     }
 
     /// <summary>
@@ -320,6 +372,6 @@ public class GameFlowController : MonoBehaviour
     /// </summary>
     int GetNewTarget(int turn)
     {
-        return targetCash = 200 + turn * 50;
+        return targetCash = targetCash + Mathf.FloorToInt( 110 * (turn + 0.5f) );
     }
 }

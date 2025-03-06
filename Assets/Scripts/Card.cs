@@ -130,7 +130,11 @@ public class Card
     /// <summary>
     /// Type of card
     /// </summary>
-    public CardType type; 
+    public CardType type;
+    /// <summary>
+    /// price of card in shop
+    /// </summary>
+    public short price;
 }
 
 public class BuildingCard : Card
@@ -207,9 +211,45 @@ public class BuildingCard : Card
             case BuildingType.Residential:
                 switch (buildingID.id)
                 {
-                    // define for residential building 10 to 14
-                    case ushort n when (n >= 10 && n <= 14):
+                    case ushort n when (n >= 15 && n <= 21):
                         Bonus[] _bonus = new Bonus[]
+                        {
+                            new Bonus
+                            (
+                                BonusType.RatioUpkeep,
+                                new BuildingType[] { BuildingType.Residential },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {0, 1, 0},
+                                                {1, 0, 1},
+                                                {0, 1, 0}
+                                            },
+                                -0.15f
+                            ),
+                            new Bonus
+                            (
+                                BonusType.RatioBonus,
+                                new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {  0,  0,  1,  0,  0},
+                                                {  0,  1,  1,  1,  0},
+                                                {  1,  1,  0,  1,  1},
+                                                {  0,  1,  1,  1,  0},
+                                                {  0,  0,  1,  0,  0}
+                                            },
+                                0.2f
+                            )
+                        };
+                        this.description = "-10% upkeep for all residential buildings within 1 tile around." +
+                            "+20%(+10%) income for all commercial buildings within 1(2) tile(s) around.";
+                        this.bonus = _bonus;
+                        this.upkeep = 10;
+                        this.profit = 20;
+                        this.price = 25;
+                        return;
+                    case ushort n when (n >= 10 && n <= 14):
+                        _bonus = new Bonus[]
                         {
                             // add a -10% upkeep bonus to all residential building
                             // 1 tile around this building
@@ -244,9 +284,50 @@ public class BuildingCard : Card
                                 0.2f
                             )
                         };
+                        this.description = "-10% upkeep for all residential buildings within 1 tile around." + 
+                            "+20%(+10%) income for all commercial buildings within 1(2) tile(s) around.";
                         this.bonus = _bonus;
                         this.upkeep = 10;
                         this.profit = 20;
+                        this.price = 25;
+                        return;
+
+                    case ushort n when (n >= 6 && n <= 9):
+                        _bonus = new Bonus[]
+                        {
+                            new Bonus
+                            (
+                                BonusType.RatioUpkeep,
+                                new BuildingType[] { BuildingType.Residential },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {0, 1, 0},
+                                                {1, 0, 1},
+                                                {0, 1, 0}
+                                            },
+                                -0.5f
+                            ),
+                            new Bonus
+                            (
+                                BonusType.RatioBonus,
+                                new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {0, 0, 1, 0, 0},
+                                                {0, 1, 1, 1, 0},
+                                                {1, 1, 0, 1, 1},
+                                                {0, 1, 1, 1, 0},
+                                                {0, 0, 1, 0, 0},
+                                            },
+                                0.1f
+                            )
+                        };
+                        this.description = "-5% upkeep for all residential buildings within 1 tile around." +
+                            "+10% income for all commercial buildings within 2 tiles around.";
+                        this.bonus = _bonus;
+                        this.upkeep = 8;
+                        this.profit = 10;
+                        this.price = 10;
                         return;
 
                     // define for residential building 1 to 5
@@ -284,9 +365,12 @@ public class BuildingCard : Card
                                 1
                             )
                         };
+                        this.description = "-$1 upkeep for all residential buildings within 1 tile around." + 
+                            "+$1 income for all commercial buildings within 1 tile around.";
                         this.bonus = _bonus15;
                         this.upkeep = 3;
                         this.profit = 5;
+                        this.price = 5;
                         return;
                 }
                 break;
@@ -317,20 +401,99 @@ public class BuildingCard : Card
                                 new BuildingType[] { BuildingType.Residential },
                                 BonusRange.Adjacent,
                                 new float[,] {
-                                                {   0,    0, 1,    0,    0},
-                                                {   0, 1,   -1, 1,    0},
-                                                {1,    -1,    0,    -1, 1},
-                                                {   0, 1,    -1, 1f,    0},
-                                                {   0,    0, 1f,    0,    0}
+                                                {   0,   0,   1,   0,   0},
+                                                {   0,   1,  -1,   1,   0},
+                                                {   1,  -1,   0,  -1,   1},
+                                                {   0,   1,  -1,   1,   0},
+                                                {   0,   0,   1,   0,   0}
                                              },
                                 0.2f
                             )
                         };
+                        this.description = "+$1 income for all residential buildings within 1 tile around." + 
+                            "+20% income for all commercial buildings at 2 tiles away," + 
+                            " -20% income for all commercial buildings within 1 tile around";
                         this.bonus = _bonus;
                         this.upkeep = 20;
                         this.profit = 25;
+                        this.price = 30;
                         return;
-
+                    case ushort n when (n >= 5 && n <= 13):
+                        _bonus = new Bonus[]
+                        {
+                            new Bonus
+                            (
+                                BonusType.FixedUpkeep,
+                                new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {0, 1, 0},
+                                                {1, 0, 1},
+                                                {0, 1, 0}
+                                             },
+                                -10
+                            ),
+                            new Bonus
+                            (
+                                BonusType.RatioBonus,
+                                new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {  0,  0,  1,  0,  0},
+                                                {  0,  1,  1,  1,  0},
+                                                {  1,  1,  0,  1,  1},
+                                                {  0,  1,  1,  1,  0},
+                                                {  0,  0,  1,  0,  0}
+                                             },
+                                -0.2f
+                            )
+                        };
+                        this.description = "-10% income for all commercial buildings within 1 tiles around. " +
+                            "-$10 upkeep for all commercial buildings within 2 tiles around.";
+                        this.bonus = _bonus;
+                        this.upkeep = 25;
+                        this.profit = 50;
+                        this.price = 60;
+                        return;
+                    case ushort n when (n >= 14 && n <= 19):
+                        _bonus = new Bonus[]
+                        {
+                            new Bonus
+                            (
+                                BonusType.FixedUpkeep,
+                                new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {  0,  0,  1,  0,  0},
+                                                {  0,  1,  1,  1,  0},
+                                                {  1,  1,  0,  1,  1},
+                                                {  0,  1,  1,  1,  0},
+                                                {  0,  0,  1,  0,  0}
+                                             },
+                                -15
+                            ),
+                            new Bonus
+                            (
+                                BonusType.RatioBonus,
+                                new BuildingType[] { BuildingType.Commercial },
+                                BonusRange.Adjacent,
+                                new float[,] {
+                                                {  0,  0,  1,  0,  0},
+                                                {  0,  1,  1,  1,  0},
+                                                {  1,  1,  0,  1,  1},
+                                                {  0,  1,  1,  1,  0},
+                                                {  0,  0,  1,  0,  0}
+                                             },
+                                -0.2f
+                            )
+                        };
+                        this.description = "-20% income for all commercial buildings within 2 tiles around. " +
+                            "-$15 upkeep for all commercial buildings within 2 tiles around.";
+                        this.bonus = _bonus;
+                        this.upkeep = 50;
+                        this.profit = 100;
+                        this.price = 125;
+                        return;
                 }
                 break;
             case BuildingType.Industrial:
@@ -347,21 +510,24 @@ public class BuildingCard : Card
                                 new BuildingType[] { BuildingType.Residential },
                                 BonusRange.Adjacent,
                                 new float[,] {
-                                                {0.5f, 1, 0.5f},
-                                                {1, 0, 1},
-                                                {0.5f, 1, 0.5f}
+                                                {0.5f,   1, 0.5f},
+                                                {   1,   0,    1},
+                                                {0.5f,   1, 0.5f}
                                              },
                                 -0.5f
                             )
                         };
+                        this.description = "-50%(-25%) income for all residential buildings within 1(2) tile(s) around";
                         this.bonus = _bonus;
                         this.upkeep = 50;
                         this.profit = 15;
+                        this.price = 20;
                         return;
                 }
                 break;
         }
         this.bonus = new Bonus[0];
+        this.price = 50;
     }
 }
 
@@ -399,9 +565,10 @@ public class EventCard : Card
                             BuildingType.Commercial,
                             BuildingType.Industrial
                         },
-                        20,
+                        0.2f,
                         2
                     );
+                eventCard.price = 50;
                 return eventCard;
             default:
                 Debug.LogError("Undefined event card was created");

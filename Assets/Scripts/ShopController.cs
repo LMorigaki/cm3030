@@ -5,6 +5,9 @@ using UnityEngine;
 public class ShopController : MonoBehaviour
 {
     public readonly int maxCardCount = 10;
+    /// <summary>
+    /// card prefab
+    /// </summary>
     GameObject card;
     GameObject cardContainer;
 
@@ -38,8 +41,9 @@ public class ShopController : MonoBehaviour
                 _card = EventCard.RandomEventCard();
             }
             GameObject newcard = GameObject.Instantiate(card, cardContainer.transform);
-            newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
             newcard.GetComponent<CardBehaviour>().inShop = true;
+            newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
+            
         }
     }
 

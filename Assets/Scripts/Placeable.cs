@@ -158,14 +158,14 @@ public class Placeable : MonoBehaviour
     {
         if (rotated)
         {
-            posOffset = Vector3.zero;
+            posOffset -= offsetRotation;
 			transform.Rotate(0.0f, 90.0f, 0.0f, Space.World);
             transform.position -= offsetRotation;
         }
 		else
         {
             transform.Rotate(0.0f, -90.0f, 0.0f, Space.World);
-            posOffset = offsetRotation;
+            posOffset += offsetRotation;
             transform.position += offsetRotation;
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Stores card info and provides behaviour of a card object
@@ -22,6 +23,7 @@ public class CardBehaviour : MonoBehaviour
     public Animator animator;
     public UIBringToFront bringToFront;
     public Button button;
+    public GameObject priceDisplayer;
 
     /// <summary>
     /// Initialize child objects base on given card info
@@ -32,10 +34,10 @@ public class CardBehaviour : MonoBehaviour
         this.card = card;
         Transform _cardButton = transform.Find("CardButton");
         GameObject _title = _cardButton.Find("Title").gameObject;
-        _title.GetComponent<Text>().text = card.title;
+        _title.GetComponent<TextMeshProUGUI>().text = card.title;
 
         GameObject _description = _cardButton.Find("Description").gameObject;
-        _description.GetComponent<Text>().text = card.description;
+        _description.GetComponent<TextMeshProUGUI>().text = card.description;
 
         if (card.type == CardType.Building)
         {
@@ -47,24 +49,11 @@ public class CardBehaviour : MonoBehaviour
 
         }
         transform.Find("CardButton").GetComponent<Button>().interactable = true;
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        /*
-        if (card == null)
+        if (inShop)
         {
-            Card _card = new Card("Test", "Some text", CardType.Building);
-            SetCardInfo(_card);
+            priceDisplayer.SetActive(true);
+            priceDisplayer.GetComponent<TextMeshProUGUI>().text = "$" + card.price.ToString();
         }
-        */
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     /// <summary>
@@ -74,8 +63,23 @@ public class CardBehaviour : MonoBehaviour
     {
         if (inShop)
         {
-            DeckController deckController = GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>();
-            deckController.InsertFromShop(gameObject);
+            if (GameObject.Find("EventSystem").GetComponent<GameFlowController>().BuyCard(card.price))
+            {
+                if (card.type == CardType.Building)
+                {
+                    DeckController deckController = GameObject.FindGameObjectWithTag("DeckFolder").GetComponent<DeckController>();
+                    deckController.InsertFromShop(gameObject);
+                    priceDisplayer.SetActive(false);
+                    inShop = false;
+                }
+                else if (card.type == CardType.Event)
+                {
+                    TilemapController tilemapController = GameObject.FindGameObjectWithTag("TilemapController").GetComponent<TilemapController>();
+                    tilemapController.board.ApplyEvent((EventCard)card);
+                    Destroy(gameObject);
+                }
+            }
+            return;
         }
         else
         {
@@ -110,6 +114,7 @@ public class CardBehaviour : MonoBehaviour
     /// </summary>
     public void Activate()
     {
+        priceDisplayer.SetActive(false);
         animator.enabled = true;
         bringToFront.enabled = true;
         bringToFront.Initialise();
@@ -134,10 +139,10 @@ public class CardBehaviour : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void Remove()
+    public void SetInteractable(bool value)
     {
-        // remove reference to this card from other objects
-        // destroy self
+        button.enabled = value;
+        animator.enabled = value;
     }
 
     private void OnDestroy()
