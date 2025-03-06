@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DeckController : MonoBehaviour
 {
     public readonly int maxCardCount = 6;
     GameObject card;
     GameObject cardContainer;
-    UnityEngine.UI.Selectable selectable;
+    Selectable selectable;
 
     private void Awake()
     {
@@ -31,8 +32,32 @@ public class DeckController : MonoBehaviour
         selectable.interactable = false;
     }
 
+    public void EnableCards()
+    {
+        for (int i = 0; i < cardContainer.transform.childCount; i++)
+        {
+            Button btn = cardContainer.transform.GetChild(i).GetComponentInChildren<Button>();
+            if (btn != null)
+            {
+                btn.interactable = true;
+            }
+        }
+    }
+
+    public void DisableCards()
+    {
+        for (int i = 0; i < cardContainer.transform.childCount; i++)
+        {
+            Button btn = cardContainer.transform.GetChild(i).GetComponentInChildren<Button>();
+            if (btn != null)
+            {
+                btn.interactable = false;
+            }  
+        }
+    }
+
     // insert random cards
-    public void InsertRandomCards(int? amount = null)
+    public void InsertRandomCards(bool enabled = true, int ? amount = null)
     {
         if (amount == null)
         {
@@ -44,6 +69,10 @@ public class DeckController : MonoBehaviour
             GameObject newcard = GameObject.Instantiate(card, cardContainer.transform);
             newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
             newcard.GetComponent<CardBehaviour>().Activate();
+            if (!enabled)
+            {
+                newcard.GetComponentInChildren<Button>().interactable = false;
+            }
         }
     }
 

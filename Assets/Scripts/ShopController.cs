@@ -50,7 +50,7 @@ public class ShopController : MonoBehaviour
     {
         for (int i = 0; i < cardContainer.transform.childCount; i++)
         {
-            Destroy(cardContainer.transform.GetChild(i).transform);
+            Destroy(cardContainer.transform.GetChild(i).gameObject);
         }
     }
 

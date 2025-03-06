@@ -13,10 +13,26 @@ public class GameFlowController : MonoBehaviour
     public TextMeshProUGUI DisplayIncome;
     public TextMeshProUGUI DisplayExpenditure;
     public Button BtnNextTurn;
+    public Button BtnNextPharse;
+    public GameObject BtnNextPharseObj;
+    public Button BtnShop;
+    public GameObject BtnShopObj;
 
     public TilemapController tilemapController;
     public DeckController deckController;
     public ShopController shopController;
+
+    static class BtnNextPharseText
+    {
+        public static readonly string drawBuildings = "Draw Buildings";
+        public static readonly string drawEvents = "Draw Events";
+        public static readonly string returnCards = "Return Cards";
+    }
+    static class BtnShopText
+    {
+        public static readonly string showShop = "Show Shop";
+        public static readonly string hideShop = "Hide Shop";
+    }
 
     int currentTurn;
     const int maxTurns = 5;
@@ -49,8 +65,6 @@ public class GameFlowController : MonoBehaviour
         cash = 1000;
         UpdateTexts();
         DisplayTurn.text = "Round: " + currentTurn + "/" + maxTurns;
-        deckController.InsertRandomCards();
-        deckController.FanCards();
     }
 
     // Start is called before the first frame update
@@ -58,9 +72,7 @@ public class GameFlowController : MonoBehaviour
     {
         Initialize();
         OnTurnBegin();
-    }
-
-    
+    }   
 
     // Update is called once per frame
     void Update()
@@ -78,13 +90,95 @@ public class GameFlowController : MonoBehaviour
             OnGameOver();
             return;
         }
+        // update target cash
         targetCash = GetNewTarget(currentTurn);
         BtnNextTurn.interactable = true;
-        
+        // collect income from building
+        int profit = Mathf.FloorToInt(tilemapController.board.TotalProfit());
+        cash += profit;
+        // update GUI texts
         UpdateTexts();
+        // start timer
         timer = StartCoroutine(UpdateTime());
-        // todo: draw event card
-        StartBuildingPharse();
+
+        BtnNextPharse.interactable = true;
+        BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>().text = BtnNextPharseText.drawBuildings;
+        BtnShop.interactable = false;
+        BtnShop.GetComponentInChildren<TextMeshProUGUI>().text = BtnShopText.showShop;
+        BtnShopObj.SetActive(false);
+        
+        //StartCoroutine(DrawBuildingCards());
+    }
+
+    IEnumerator DrawBuildingCards()
+    {
+        deckController.ShowDeck();
+        for (int i = 0; i < deckController.maxCardCount; i++)
+        {
+            deckController.InsertRandomCards(false, 1);
+            deckController.FanCards();
+            yield return new WaitForSeconds(0.25f);
+        }
+        deckController.HideDeck();
+        yield return new WaitForSeconds(0.5f);
+        BtnNextPharse.interactable = true;
+    }
+
+    void DrawEventCards()
+    {
+        // todo: draw event cards
+    }
+
+    void OnBuildingPharseStart()
+    {
+        deckController.ShowDeck();
+        deckController.EnableCards();
+        BtnShopObj.SetActive(true);
+        BtnShop.interactable = true;
+        StartCoroutine(OnBuildingPharseStartLate());
+    }
+
+    IEnumerator OnBuildingPharseStartLate()
+    {
+        yield return new WaitForSeconds(0.25f);
+        BtnNextPharse.interactable = true;
+    }
+
+    void OnBuildingPharseEnd()
+    {
+        BtnNextPharse.interactable = false;
+        BtnNextPharseObj.SetActive(false);
+        BtnShop.interactable = false;
+        BtnShopObj.SetActive(false);
+        deckController.RemoveAll();
+        deckController.HideDeck();
+        ClearShop();
+        OnTurnEnd();
+    }
+
+    void InitialiseShop()
+    {
+        shopController.gameObject.SetActive(true);
+        shopController.InsertRandomCards();
+        shopController.gameObject.SetActive(false);
+    }
+
+    void ShowShop()
+    {
+        Debug.Log("show shop");
+        BtnNextPharseObj.SetActive(false);
+        shopController.gameObject.SetActive(true);
+    }
+
+    void HideShop()
+    {
+        shopController.gameObject.SetActive(false);
+        BtnNextPharseObj.SetActive(true);
+    }
+
+    void ClearShop()
+    {
+        shopController.RemovelAll();
     }
 
     /// <summary>
@@ -102,7 +196,7 @@ public class GameFlowController : MonoBehaviour
     public void OnTurnEnd()
     {
         BtnNextTurn.interactable = false;
-        StopCoroutine(timer);
+        StopAllCoroutines();
 
         deckController.RemoveAll();
 
@@ -119,41 +213,58 @@ public class GameFlowController : MonoBehaviour
         OnTurnBegin();
     }
 
-    void StartBuildingPharse()
-    {
-        deckController.ShowDeck();
-        deckController.InsertRandomCards();
-        deckController.FanCards();
-
-        int profit = Mathf.FloorToInt(tilemapController.board.TotalProfit());
-        cash += profit;
-
-        UpdateTexts();
-    }
-
-    void EndBuildingPharse()
-    {
-        deckController.RemoveAll();
-        deckController.HideDeck();
-
-        StartShoppingParse();
-    }
-
-    void StartShoppingParse()
-    {
-        shopController.gameObject.SetActive(true);
-        shopController.InsertRandomCards();
-    }
-
-    public void EndShoppingParse()
-    {
-        shopController.RemovelAll();
-        shopController.gameObject.SetActive(false);
-    }
-
     void OnGameOver()
     {
+        BtnNextTurn.interactable = false;
+        StopAllCoroutines();
+        deckController.RemoveAll();
+
         // todo: disable GUI interactions
+    }
+
+    public void OnBtnNextPharseClicked()
+    {
+        BtnNextPharse.interactable = false;
+        TextMeshProUGUI textMesh = BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>();
+        if (textMesh.text == BtnNextPharseText.drawBuildings)
+        {
+            textMesh.text = BtnNextPharseText.drawEvents;
+            StartCoroutine(DrawBuildingCards());
+        }
+        else if (textMesh.text == BtnNextPharseText.drawEvents)
+        {
+            textMesh.text = BtnNextPharseText.returnCards;
+            DrawEventCards();
+            InitialiseShop();
+            OnBuildingPharseStart();
+        }
+        else if (textMesh.text == BtnNextPharseText.returnCards)
+        {
+            OnBuildingPharseEnd();
+        }
+    }
+
+    public void OnBtnShopClicked()
+    {
+        BtnShop.interactable = false;
+        TextMeshProUGUI textMesh = BtnShop.GetComponentInChildren<TextMeshProUGUI>();
+        if (textMesh.text == BtnShopText.showShop)
+        {
+            textMesh.text = BtnShopText.hideShop;
+            ShowShop();
+        }
+        else if (textMesh.text == BtnShopText.hideShop)
+        {
+            textMesh.text = BtnShopText.showShop;
+            HideShop();
+        }
+        StartCoroutine(OnBtnShopClickedLate());
+    }
+
+    IEnumerator OnBtnShopClickedLate()
+    {
+        yield return new WaitForSeconds(0.25f);
+        BtnShop.interactable = true;
     }
 
     /// <summary>
@@ -165,7 +276,7 @@ public class GameFlowController : MonoBehaviour
         expenditure = Mathf.FloorToInt(tilemapController.board.TotalUpkeep());
 
         UpdateTexts();
-
+        //execution wait after objects are destroyed
         StartCoroutine(OnBoardChangeLate());
     }
 
@@ -174,7 +285,7 @@ public class GameFlowController : MonoBehaviour
         yield return new WaitForEndOfFrame();
         if (!deckController.HasCard())
         {
-            EndBuildingPharse();
+            OnBuildingPharseEnd();
         }
     }
 
@@ -193,6 +304,9 @@ public class GameFlowController : MonoBehaviour
         OnTurnEnd();
     }
 
+    /// <summary>
+    /// updates GUI textes
+    /// </summary>
     void UpdateTexts()
     {
         DisplayCash.text = "Cash: " + cash;
