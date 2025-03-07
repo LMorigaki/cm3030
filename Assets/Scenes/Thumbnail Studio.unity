@@ -290,7 +290,7 @@ MonoBehaviour:
   renderTexture: {fileID: 8400000, guid: 9a1ff251bcd9fa84db78508002b1e9b8, type: 2}
   target: {fileID: 1233811422}
   directory: Assets/Resources/Thumbnails
-  fileName: building img (1)
+  fileName: building img (5)
 --- !u!4 &1949344873
 Transform:
   m_ObjectHideFlags: 0

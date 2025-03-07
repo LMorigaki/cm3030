@@ -52,6 +52,18 @@ public static class ModelManager
 	/// Directory of industrial building models in asset database
 	/// </summary>
     public const string industrialDir = "Industrial/";
+    /// <summary>
+    /// Amount of residential building models in asset database
+    /// </summary>
+    public const ushort residentialCount = 21;
+    /// <summary>
+    /// Amount of commercial building models in asset database
+    /// </summary>
+    public const ushort commercialCount = 19;
+    /// <summary>
+    /// Amount of industrial building models in asset database
+    /// </summary>
+    public const ushort industrialCount = 7;
 
     /// <summary>
     /// Loads a specific building from asset database
@@ -125,12 +137,50 @@ public static class ModelManager
         switch (type)
         {
             case BuildingType.Residential:
-                id.id = (ushort)Random.Range(1, 22);
+                id.id = (ushort)Random.Range(1, residentialCount + 1);
                 break;
             case BuildingType.Commercial:
-                id.id = (ushort)Random.Range(1, 20);
+                id.id = (ushort)Random.Range(1, commercialCount + 1);
                 break;
             case BuildingType.Industrial:
+                id.id = (ushort)Random.Range(1, industrialCount + 1);
+                break;
+        }
+        return id;
+    }
+
+    /// <summary>
+    /// Return random building id with random building type by weighted random
+    /// </summary>
+    public static BuildingID GetRandomBuilding()
+    {
+        BuildingID id = new BuildingID();
+
+        // weighted random
+        ushort key = (ushort)Random.Range(0, residentialCount + commercialCount + industrialCount);
+        if (key < residentialCount)
+        {
+            id.type = BuildingType.Residential;
+        }
+        else if (key < residentialCount + commercialCount)
+        {
+            id.type = BuildingType.Commercial;
+        }
+        else
+        {
+            id.type = BuildingType.Industrial;
+        }
+
+        switch (id.type)
+        {
+            case BuildingType.Residential:
+                id.id = (ushort)Random.Range(1, residentialCount + 1);
+                break;
+            case BuildingType.Commercial:
+                id.id = (ushort)Random.Range(1, commercialCount + 1);
+                break;
+            case BuildingType.Industrial:
+                id.id = (ushort)Random.Range(1, industrialCount + 1);
                 break;
         }
         return id;
@@ -156,7 +206,7 @@ public static class ModelManager
                 _directory = industrialDir + _directory;
                 break;
             default:
-                Debug.LogError("Incorrect format of building ID, expected character r/c/i followed by number get: '" + id + "'");
+                Debug.LogError("Incorrect format of building ID, get: '" + id.ToString() + "'");
                 return null;
         }
         return _directory;
