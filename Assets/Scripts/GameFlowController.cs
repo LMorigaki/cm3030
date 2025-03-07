@@ -6,17 +6,22 @@ using TMPro;
 
 public class GameFlowController : MonoBehaviour
 {
-    public TextMeshProUGUI DisplayTurn;
-    public TextMeshProUGUI DisplayTime;
-    public TextMeshProUGUI DisplayCash;
-    public TextMeshProUGUI DisplayTargetIncome;
-    public TextMeshProUGUI DisplayIncome;
+    #region GUI elements
+    public TextMeshProUGUI TurnText;
+    public TextMeshProUGUI TimeText;
+    public TextMeshProUGUI CashText;
+    public TextMeshProUGUI TargetText;
+    public TextMeshProUGUI IncomeText;
     public Button BtnNextTurn;
     public Button BtnNextPharse;
     public GameObject BtnNextPharseObj;
     public Button BtnShop;
     public GameObject BtnShopObj;
     public GameObject EventCardDisplayer;
+    public Button BtnSummary;
+    public GameObject SummaryObj;
+    public TextMeshProUGUI SummaryText;
+    #endregion
 
     public TilemapController tilemapController;
     public DeckController deckController;
@@ -70,7 +75,7 @@ public class GameFlowController : MonoBehaviour
         cash = 1000;
         targetCash = cash;
         UpdateTexts();
-        DisplayTurn.text = "Round: " + currentTurn + "/" + maxTurns;
+        TurnText.text = "Round: " + currentTurn + "/" + maxTurns;
     }
 
     private void Awake()
@@ -91,18 +96,6 @@ public class GameFlowController : MonoBehaviour
     /// </summary>
     public void OnTurnBegin()
     {
-        
-        // collect income from building
-        int profit = Mathf.FloorToInt(tilemapController.board.TotalProfit());
-        cash += profit;
-        // update GUI texts
-        UpdateTexts();
-
-        if (cash < targetCash)
-        {
-            OnGameOver();
-            return;
-        }
         if (currentTurn > maxTurns)
         {
             OnGameOver();
@@ -208,7 +201,6 @@ public class GameFlowController : MonoBehaviour
 
     void ShowShop()
     {
-        Debug.Log("show shop");
         BtnNextPharseObj.SetActive(false);
         shopController.gameObject.SetActive(true);
     }
@@ -255,15 +247,42 @@ public class GameFlowController : MonoBehaviour
         BtnNextTurn.interactable = false;
         StopAllCoroutines();
 
-        cash -= Mathf.FloorToInt(tilemapController.board.TotalUpkeep());
+        SummaryText.text = currentTurn + "/" + maxTurns + "\r\n" +
+            "\r\n" +
+             cash + "\r\n" +
+             income + "\r\n" +
+             expenditure + "\r\n" +
+             (income - expenditure) + "\r\n" +
+             "\r\n" +
+             (cash + (income - expenditure)) + "/" + targetCash;
+
+        cash += (income - expenditure);
         UpdateTexts();
-        
+        if (cash < targetCash)
+        {
+            OnGameOver();
+            return;
+        }
+        else
+        {
+            ShowSummary();
+        }
+
         currentTurn++;
         tilemapController.board.StepAndRemoveEventBonus();
-        DisplayTurn.text = "Round: " + currentTurn + "/" + maxTurns;
+        TurnText.text = "Round: " + currentTurn + "/" + maxTurns;
+    }
 
-        // todo: show dialog about turn summary
+    void ShowSummary()
+    {
+        SummaryObj.SetActive(true);
+        BtnSummary.interactable = true;
+    }
 
+    public void OnBtnSummaryClicked()
+    {
+        BtnSummary.interactable = false;
+        SummaryObj.SetActive(false);
         OnTurnBegin();
     }
 
@@ -349,7 +368,7 @@ public class GameFlowController : MonoBehaviour
         time = maxTime;
         while (time > 0)
         {
-            DisplayTime.text = "End Round (" + time + "s)";
+            TimeText.text = "End Round (" + time + "s)";
             yield return new WaitForSeconds(1);
             time--;
         }
@@ -362,9 +381,9 @@ public class GameFlowController : MonoBehaviour
     void UpdateTexts()
     {
         // improve: show change of value in animation
-        DisplayCash.text = "Cash: " + cash;
-        DisplayTargetIncome.text = "Target: " + targetCash;
-        DisplayIncome.text = "Income: " + (income - expenditure);
+        CashText.text = "Cash: " + cash;
+        TargetText.text = "Target: " + targetCash;
+        IncomeText.text = "Income: " + (income - expenditure);
     }
 
     /// <summary>
