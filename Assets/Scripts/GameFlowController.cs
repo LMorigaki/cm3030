@@ -12,15 +12,25 @@ public class GameFlowController : MonoBehaviour
     public TextMeshProUGUI CashText;
     public TextMeshProUGUI TargetText;
     public TextMeshProUGUI IncomeText;
+
     public Button BtnNextTurn;
+
     public Button BtnNextPharse;
     public GameObject BtnNextPharseObj;
+
     public Button BtnShop;
     public GameObject BtnShopObj;
+
     public GameObject EventCardDisplayer;
+
     public Button BtnSummary;
     public GameObject SummaryObj;
     public TextMeshProUGUI SummaryText;
+
+    public Button BtnNewGame;
+    public GameObject GameOverSummaryObj;
+    public TextMeshProUGUI GameOverSummaryNumbers;
+    public TextMeshProUGUI GameOverSummaryText;
     #endregion
 
     public TilemapController tilemapController;
@@ -50,7 +60,7 @@ public class GameFlowController : MonoBehaviour
     /// remaining time of this turn
     /// </summary>
     int time;
-    const int maxTime = 120;
+    const int maxTime = 60;
     /// <summary>
     /// the cash in hand
     /// </summary>
@@ -98,7 +108,7 @@ public class GameFlowController : MonoBehaviour
     {
         if (currentTurn > maxTurns)
         {
-            OnGameOver();
+            OnGameOver(true);
             return;
         }
         // update target cash
@@ -247,20 +257,14 @@ public class GameFlowController : MonoBehaviour
         BtnNextTurn.interactable = false;
         StopAllCoroutines();
 
-        SummaryText.text = currentTurn + "/" + maxTurns + "\r\n" +
-            "\r\n" +
-             cash + "\r\n" +
-             income + "\r\n" +
-             expenditure + "\r\n" +
-             (income - expenditure) + "\r\n" +
-             "\r\n" +
-             (cash + (income - expenditure)) + "/" + targetCash;
+        SummaryText.text = GetSummary();
+        GameOverSummaryNumbers.text = GetSummary();
 
         cash += (income - expenditure);
         UpdateTexts();
         if (cash < targetCash)
         {
-            OnGameOver();
+            OnGameOver(false);
             return;
         }
         else
@@ -286,14 +290,26 @@ public class GameFlowController : MonoBehaviour
         OnTurnBegin();
     }
 
-    void OnGameOver()
+    void OnGameOver(bool win)
     {
-        BtnNextTurn.interactable = false;
-        StopAllCoroutines();
         deckController.RemoveAll();
 
-        // todo: disable GUI interactions
-        // todo: show dialog about game summary
+        if (win)
+        {
+            GameOverSummaryText.text = "You achieved all targets";
+        }
+        else
+        {
+            GameOverSummaryText.text = "You failed to reach the target";
+        }
+        GameOverSummaryObj.SetActive(true);
+        BtnNewGame.interactable = true;
+    }
+
+    public void OnBtnNewGameClicked()
+    {
+        BtnNewGame.interactable = false;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
     }
 
     /// <summary>
@@ -386,11 +402,23 @@ public class GameFlowController : MonoBehaviour
         IncomeText.text = "Income: " + (income - expenditure);
     }
 
+    string GetSummary()
+    {
+        return currentTurn + "/" + maxTurns + "\r\n" +
+               "\r\n" +
+                cash + "\r\n" +
+                income + "\r\n" +
+                expenditure + "\r\n" +
+                (income - expenditure) + "\r\n" +
+                "\r\n" +
+                (cash + (income - expenditure)) + "/" + targetCash;
+    }
+
     /// <summary>
     /// calculate and return new income target 
     /// </summary>
     int GetNewTarget(int turn)
     {
-        return targetCash = targetCash + Mathf.FloorToInt( 110 * (turn + 0.5f) );
+        return targetCash = Mathf.FloorToInt(targetCash * 1.15f);
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
-	public float rotationSpeed = 10;
+	public float rotationSpeed = 30;
 	public float zoomSpeed = 2;
 	public float defaultZoom = 50; 
 	public float minZoom = 20;
@@ -35,32 +35,25 @@ public class CameraController : MonoBehaviour
 		axisRotation += newPos.normalized;
     }
 
-	public void OnRotateCam(InputValue value) {
-		if(!Mouse.current.rightButton.isPressed) {
+	public void OnRotateCam(InputValue value)
+	{
+		if(!Mouse.current.rightButton.isPressed)
+		{
 			return;
 		}
 		
 		Vector2 deltaMouse = value.Get<Vector2>();
-		
-		//Debug.Log("Cam rotated : " + deltaMouse);
-		
-	    angle += (deltaMouse.x * 0.01f) % 360;
-		Vector3 circle = new Vector3(Mathf.Cos(angle) * radius, transform.position.y, Mathf.Sin(angle) * radius);
-		circle += new Vector3(axisRotation.x, 0, axisRotation.z);
-		//Vector3 centre = transform.position - circle;
-		transform.position = circle;
-		
-		Vector3 lpos = (axisRotation + cameraTilt * Vector3.up) - transform.position;
-		transform.rotation = Quaternion.LookRotation(lpos);
-		cam.transform.LookAt(board);
+
+		cam.transform.RotateAround(board.transform.position, Vector3.up, deltaMouse.x * Time.deltaTime * rotationSpeed);
+		cam.transform.RotateAround(board.transform.position, transform.right, deltaMouse.y * Time.deltaTime * rotationSpeed * -1);
 	}
 
-	public void OnZoomCam(InputValue value) {
+	public void OnZoomCam(InputValue value)
+	{
 		float deltaScroll = value.Get<float>();
-		//Debug.Log("Cam Zoom : " + deltaScroll);
-
-		float newSize = cam.orthographicSize + (zoomSpeed * deltaScroll / 120);
-		cam.orthographicSize = Mathf.Clamp(newSize, minZoom, maxZoom);
+		Vector3 v3 = Vector3.zero;
+		v3.z = zoomSpeed * deltaScroll * Time.deltaTime;
+		cam.transform.Translate(v3, Space.Self);
 	}
 
 	public void OnMoveCam(InputValue value) {
