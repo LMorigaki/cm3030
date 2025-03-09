@@ -32,7 +32,7 @@ public class ShopController : MonoBehaviour
         for (int i = 0; i < (int)amount; i++)
         {
             Card _card;
-            if (Random.Range(0, 1f) > 0.5f)
+            if (Random.Range(0, 1f) > 0.2f)
             {
                 _card = BuildingCard.RandomBuildingCard();
             }

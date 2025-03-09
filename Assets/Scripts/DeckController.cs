@@ -59,8 +59,13 @@ public class DeckController : MonoBehaviour
         }
     }
 
-    // insert random cards
-    public void InsertRandomCards(bool enabled = true, int ? amount = null)
+    /// <summary>
+    /// Insert random cards to deck
+    /// </summary>
+    /// <param name="enabled">if true, card is interactable</param>
+    /// <param name="amount">amount of card to be inserted to deck</param>
+    /// <param name="buildingType">type of building to be inserted</param>
+    public void InsertRandomCards(bool enabled = true, int ? amount = null, BuildingType? buildingType = null)
     {
         if (amount == null)
         {
@@ -68,7 +73,15 @@ public class DeckController : MonoBehaviour
         }
         for (int i = 0; i < (int)amount; i++)
         {
-            BuildingCard _card = BuildingCard.RandomBuildingCard();
+            BuildingCard _card;
+            if (buildingType is null)
+            {
+                _card = BuildingCard.RandomBuildingCard();
+            }
+            else
+            {
+                _card = BuildingCard.RandomBuildingCard(buildingType.Value);
+            }
             GameObject newcard = GameObject.Instantiate(card, cardContainer.transform);
             newcard.GetComponent<CardBehaviour>().SetCardInfo(_card);
             newcard.GetComponent<CardBehaviour>().Activate();

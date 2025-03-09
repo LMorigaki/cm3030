@@ -52,6 +52,9 @@ public class CardBehaviour : MonoBehaviour
         }
         if (card.type == CardType.Event)
         {
+            GameObject _image = _cardButton.Find("Image").gameObject;
+            _image.GetComponent<Image>().sprite = ModelManager.LoadImage(((EventCard)card).eventID.Value);
+
             _cardButton.Find("Income").gameObject.SetActive(false);
             _cardButton.Find("Upkeep").gameObject.SetActive(false);
         }

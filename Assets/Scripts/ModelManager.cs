@@ -126,6 +126,28 @@ public static class ModelManager
     }
 
     /// <summary>
+    /// Loads image of a specific event card from asset database
+    /// </summary>
+    /// <param name="eventId">event id</param>
+    /// <returns></returns>
+    public static Sprite LoadImage(byte eventId)
+    {
+        string _directory = "Event/event (" + eventId + ")";
+
+        Sprite img;
+        try
+        {
+            img = Resources.Load<Sprite>(_directory);
+        }
+        catch (System.Exception)
+        {
+            Debug.LogError("Could not load sprite at 'Asset/Resources/" + _directory + "'");
+            throw;
+        }
+        return img;
+    }
+
+    /// <summary>
     /// Return random building id with specified type
     /// </summary>
     /// <param name="type">building type</param>

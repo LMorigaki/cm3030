@@ -145,8 +145,7 @@ public class GameFlowController : MonoBehaviour
     {
         // update target cash
         UpdateTexts();
-        // start timer
-        timer = StartCoroutine(UpdateTime());
+        
         BtnNextTurn.interactable = true;
         //BtnNextPharse.interactable = true;
         //BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>().text = BtnNextPharseText.drawBuildings;
@@ -167,9 +166,23 @@ public class GameFlowController : MonoBehaviour
     {
         // draw building cards
         deckController.ShowDeck();
+        // define fixed types and amount of building at draw
+        List<BuildingType> types = new List<BuildingType> 
+        {
+            BuildingType.Residential, BuildingType.Residential,
+            BuildingType.Commercial, BuildingType.Commercial
+        };
         for (int i = 0; i < deckController.maxCardCount; i++)
         {
-            deckController.InsertRandomCards(false, 1);
+            if (types.Count > 0)
+            {
+                deckController.InsertRandomCards(false, 1, types[0]);
+                types.RemoveAt(0);
+            }
+            else
+            {
+                deckController.InsertRandomCards(false, 1);
+            }
             deckController.FanCards();
             yield return new WaitForSeconds(0.25f);
         }
@@ -178,7 +191,7 @@ public class GameFlowController : MonoBehaviour
         BtnEndTurn.interactable = true;
 
         // draw event cards
-        GameObject[] eventCards = new GameObject[3];
+        GameObject[] eventCards = new GameObject[2];
         EventCardDisplayer.SetActive(true);
         for (int i = 0; i < eventCards.Length; i++)
         {
@@ -189,7 +202,7 @@ public class GameFlowController : MonoBehaviour
             tilemapController.board.ApplyEvent(_card);
             yield return new WaitForSeconds(0.25f);
         }
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(3);
         EventCardDisplayer.SetActive(false);
         for (int i = 0; i < eventCards.Length; i++)
         {
@@ -209,6 +222,9 @@ public class GameFlowController : MonoBehaviour
         BtnEndTurnObj.SetActive(true);
         BtnShopObj.SetActive(true);
         BtnShop.interactable = true;
+        // start timer
+        timer = StartCoroutine(UpdateTime());
+
         StartCoroutine(OnBuildingPharseStartLate());
     }
 

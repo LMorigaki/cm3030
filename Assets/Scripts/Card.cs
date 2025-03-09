@@ -218,9 +218,11 @@ public class BuildingCard : Card
                                 new BuildingType[] { BuildingType.Residential },
                                 BonusRange.Adjacent,
                                 new float[,] {
-                                                {0, 1, 0},
-                                                {1, 0, 1},
-                                                {0, 1, 0}
+                                                {0, 0, 1, 0, 0},
+                                                {0, 1, 1, 1, 0},
+                                                {1, 1, 0, 1, 1},
+                                                {0, 1, 1, 1, 0},
+                                                {0, 0, 1, 0, 0},
                                             },
                                 -0.15f
                             ),
@@ -230,21 +232,21 @@ public class BuildingCard : Card
                                 new BuildingType[] { BuildingType.Commercial },
                                 BonusRange.Adjacent,
                                 new float[,] {
-                                                {  0,  0,  1,  0,  0},
-                                                {  0,  1,  1,  1,  0},
-                                                {  1,  1,  0,  1,  1},
-                                                {  0,  1,  1,  1,  0},
-                                                {  0,  0,  1,  0,  0}
+                                                {   0,   0,0.5f,   0,   0},
+                                                {   0,0.5f,   1,0.5f,   0},
+                                                {0.5f,   1,   0,   1,0.5f},
+                                                {   0,0.5f,   1,0.5f,   0},
+                                                {   0,   0,0.5f,   0,   0}
                                             },
-                                0.2f
+                                0.3f
                             )
                         };
-                        this.description = "-10% upkeep for all residential buildings within 1 tile around." +
-                            "+20%(+10%) income for all commercial buildings within 1(2) tile(s) around.";
+                        this.description = "-15% upkeep for all residential buildings within 2 tile around." +
+                            "+30%(+15%) income for all commercial buildings within 1(2) tile(s) around.";
                         this.bonus = _bonus;
-                        this.upkeep = 10;
+                        this.upkeep = 20;
                         this.profit = 20;
-                        this.price = 25;
+                        this.price = 40;
                         return;
                     case ushort n when (n >= 10 && n <= 14):
                         _bonus = new Bonus[]
@@ -332,8 +334,6 @@ public class BuildingCard : Card
                     case ushort n when (n >= 1 && n <= 5):
                         Bonus[] _bonus15 = new Bonus[]
                         {
-                            // add a flat 1 upkeep bonus to all residential building
-                            // 1 tile around this building
                             new Bonus
                             (
                                 BonusType.FixedUpkeep,
@@ -344,12 +344,8 @@ public class BuildingCard : Card
                                                 {1, 0, 1},
                                                 {0, 1, 0}
                                             },
-                                -1
+                                -5
                             ),
-                            // add a flat 1 profit bonus to all commercial building
-                            // 2 tile around this building, building at 1 tile away,
-                            // gains 100% effect bonus whicle building at 2 tiles away,
-                            // gains 50% effect of bonus only
                             new Bonus
                             (
                                 BonusType.FixedBonus,
@@ -360,11 +356,11 @@ public class BuildingCard : Card
                                                 {1, 0, 1},
                                                 {0, 1, 0}
                                             },
-                                1
+                                10
                             )
                         };
-                        this.description = "-$1 upkeep for all residential buildings within 1 tile around." + 
-                            "+$1 income for all commercial buildings within 1 tile around.";
+                        this.description = "-$5 upkeep for all residential buildings within 1 tile around." + 
+                            "+$10 income for all commercial buildings within 1 tile around.";
                         this.bonus = _bonus15;
                         this.upkeep = 3;
                         this.profit = 5;
@@ -414,7 +410,7 @@ public class BuildingCard : Card
                         this.bonus = _bonus;
                         this.upkeep = 20;
                         this.profit = 25;
-                        this.price = 30;
+                        this.price = 20;
                         return;
                     case ushort n when (n >= 5 && n <= 13):
                         _bonus = new Bonus[]
@@ -451,7 +447,7 @@ public class BuildingCard : Card
                         this.bonus = _bonus;
                         this.upkeep = 25;
                         this.profit = 50;
-                        this.price = 60;
+                        this.price = 25;
                         return;
                     case ushort n when (n >= 14 && n <= 19):
                         _bonus = new Bonus[]
@@ -490,7 +486,7 @@ public class BuildingCard : Card
                         this.bonus = _bonus;
                         this.upkeep = 50;
                         this.profit = 100;
-                        this.price = 125;
+                        this.price = 50;
                         return;
                 }
                 break;
@@ -524,15 +520,17 @@ public class BuildingCard : Card
                                 },
                                 BonusRange.Adjacent,
                                 new float[,] {
-                                                {  0,   1,   0},
-                                                {  1,   0,   1},
-                                                {  0,   1,   0}
+                                                {0, 0, 1, 0, 0},
+                                                {0, 1, 1, 1, 0},
+                                                {1, 1, 0, 1, 1},
+                                                {0, 1, 1, 1, 0},
+                                                {0, 0, 1, 0, 0},
                                              },
                                 -0.5f
                             ),
                         };
                         this.description = "-50%(-25%) income for all residential buildings within 1(2) tile(s) around. " + 
-                            "-50% upkeep for all commercial and industrial buildings within 1 tile around.";
+                            "-50% upkeep for all commercial and industrial buildings within 2 tiles around.";
                         this.bonus = _bonus;
                         this.upkeep = 30;
                         this.profit = 15;
@@ -585,7 +583,7 @@ public class BuildingCard : Card
 
 public class EventCard : Card
 {
-    public static readonly int eventCount = 1;
+    public static readonly int eventCount = 8;
 
     /// <summary>
     /// ID of event
@@ -603,13 +601,13 @@ public class EventCard : Card
 
     public static EventCard RandomEventCard()
     {
-        byte id = (byte)Random.Range(1, eventCount);
+        byte id = (byte)Random.Range(1, eventCount + 1);
         switch (id)
         {
             case 1:
                 // increase profit form all buildings for 20% in 2 turns
-                EventCard eventCard = new EventCard("Tax increase", 
-                    "Increase profit from all building for 20 % in 2 turns");
+                EventCard eventCard = new EventCard("Booming economy", 
+                    "Profit +20% for all building in 2 turns");
                 eventCard.eventBonus = new EventBonus(
                         BonusType.RatioBonus,
                         new BuildingType[]{
@@ -620,10 +618,115 @@ public class EventCard : Card
                         0.2f,
                         2
                     );
+                eventCard.eventID = id;
                 eventCard.price = 50;
                 return eventCard;
+            case 2:
+                eventCard = new EventCard("Budget cuts",
+                    "Upkeep -10% for all building in this turn");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.RatioUpkeep,
+                        new BuildingType[]{
+                            BuildingType.Residential,
+                            BuildingType.Commercial,
+                            BuildingType.Industrial
+                        },
+                        -0.1f,
+                        1
+                    );
+                eventCard.eventID = id;
+                eventCard.price = 30;
+                return eventCard;
+            case 3:
+                eventCard = new EventCard("Natural disaster",
+                    "Upkeep +$10 for all building in this turn");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.FixedUpkeep,
+                        new BuildingType[]{
+                            BuildingType.Residential,
+                            BuildingType.Commercial,
+                            BuildingType.Industrial
+                        },
+                        15,
+                        1
+                    );
+                eventCard.eventID = id;
+                eventCard.price = 30;
+                return eventCard;
+            case 4:
+                eventCard = new EventCard("Population Growth",
+                    "Income +$15 for all residential building in 2 turns");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.FixedBonus,
+                        new BuildingType[]{
+                            BuildingType.Residential
+                        },
+                        15,
+                        2
+                    );
+                eventCard.eventID = id;
+                eventCard.price = 30;
+                return eventCard;
+            case 5:
+                eventCard = new EventCard("Tourism Boost",
+                    "Income +$20 for all commercial building in this turn");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.FixedBonus,
+                        new BuildingType[]{
+                            BuildingType.Commercial
+                        },
+                        20,
+                        1
+                    );
+                eventCard.eventID = id;
+                eventCard.price = 50;
+                return eventCard;
+            case 6:
+                eventCard = new EventCard("Labour strike",
+                    "Income -50% for all industrial building in this turn");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.FixedBonus,
+                        new BuildingType[]{
+                            BuildingType.Industrial
+                        },
+                        -0.5f,
+                        1
+                    );
+                eventCard.eventID = id;
+                eventCard.price = 5;
+                return eventCard;
+            case 7:
+                eventCard = new EventCard("Subsidy",
+                    "Income +20% for all commercial building in this turn");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.RatioBonus,
+                        new BuildingType[]{
+                            BuildingType.Industrial
+                        },
+                        0.2f,
+                        1
+                    );
+                eventCard.eventID = id;
+                eventCard.price = 30;
+                return eventCard;
+            case 8:
+                eventCard = new EventCard("Infrastructure failure",
+                    "Income -10% for all building in this turn");
+                eventCard.eventBonus = new EventBonus(
+                        BonusType.RatioBonus,
+                        new BuildingType[]{
+                            BuildingType.Residential,
+                            BuildingType.Commercial,
+                            BuildingType.Industrial
+                        },
+                        -0.1f,
+                        1
+                    );
+                eventCard.eventID = id;
+                eventCard.price = 5;
+                return eventCard;
             default:
-                Debug.LogError("Undefined event card was created");
+                Debug.LogError("Undefined event card was created, get id:" + id);
                 break;
         }
         return null;
