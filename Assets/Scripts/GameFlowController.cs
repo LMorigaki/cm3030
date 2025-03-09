@@ -15,13 +15,17 @@ public class GameFlowController : MonoBehaviour
 
     public Button BtnNextTurn;
 
-    public Button BtnNextPharse;
-    public GameObject BtnNextPharseObj;
+    public Button BtnEndTurn;
+    public GameObject BtnEndTurnObj;
 
     public Button BtnShop;
     public GameObject BtnShopObj;
 
     public GameObject EventCardDisplayer;
+
+    public Button BtnTurnGuide;
+    public GameObject TurnGuideObj;
+    public TextMeshProUGUI TurnGuideText;
 
     public Button BtnSummary;
     public GameObject SummaryObj;
@@ -31,6 +35,9 @@ public class GameFlowController : MonoBehaviour
     public GameObject GameOverSummaryObj;
     public TextMeshProUGUI GameOverSummaryNumbers;
     public TextMeshProUGUI GameOverSummaryText;
+
+    public Button BtnTutorial;
+    public GameObject TutorialObj;
     #endregion
 
     public TilemapController tilemapController;
@@ -86,6 +93,8 @@ public class GameFlowController : MonoBehaviour
         targetCash = cash;
         UpdateTexts();
         TurnText.text = "Round: " + currentTurn + "/" + maxTurns;
+        BtnShopObj.SetActive(false);
+        BtnEndTurnObj.SetActive(false);
     }
 
     private void Awake()
@@ -97,8 +106,36 @@ public class GameFlowController : MonoBehaviour
     void Start()
     {
         Initialize();
-        OnTurnBegin();
+        ShowTutorial();
     }   
+
+    public void ShowTutorial()
+    {
+        TutorialObj.SetActive(true);
+        BtnTutorial.interactable = true;
+    }
+
+    public void OnBtnTutorialClicked()
+    {
+        BtnTutorial.interactable = false;
+        TutorialObj.SetActive(false);
+        ShowTurnGuide();
+    }
+
+    void ShowTurnGuide()
+    {
+        targetCash = GetNewTarget(currentTurn);
+        TurnGuideObj.SetActive(true);
+        BtnTurnGuide.interactable = true;
+        TurnGuideText.text = "Own " + targetCash + " of cash at the end of this turn!";
+    }
+
+    public void OnBtnTurnGuideClicked()
+    {
+        BtnTurnGuide.interactable = false;
+        TurnGuideObj.SetActive(false);
+        OnTurnBegin();
+    }
 
     /// <summary>
     /// called before turn begin<br/>
@@ -106,33 +143,29 @@ public class GameFlowController : MonoBehaviour
     /// </summary>
     public void OnTurnBegin()
     {
-        if (currentTurn > maxTurns)
-        {
-            OnGameOver(true);
-            return;
-        }
         // update target cash
-        targetCash = GetNewTarget(currentTurn);
         UpdateTexts();
         // start timer
         timer = StartCoroutine(UpdateTime());
         BtnNextTurn.interactable = true;
-        BtnNextPharse.interactable = true;
-        BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>().text = BtnNextPharseText.drawBuildings;
-        BtnNextPharseObj.SetActive(true);
+        //BtnNextPharse.interactable = true;
+        //BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>().text = BtnNextPharseText.drawBuildings;
+        //BtnNextPharseObj.SetActive(true);
+
         BtnShop.interactable = false;
         BtnShop.GetComponentInChildren<TextMeshProUGUI>().text = BtnShopText.showShop;
         BtnShopObj.SetActive(false);
         
-        //StartCoroutine(DrawBuildingCards());
+        StartCoroutine(DrawCards());
     }
 
     /// <summary>
     /// display draw building cards animate
     /// </summary>
     /// <returns></returns>
-    IEnumerator DrawBuildingCards()
+    IEnumerator DrawCards()
     {
+        // draw building cards
         deckController.ShowDeck();
         for (int i = 0; i < deckController.maxCardCount; i++)
         {
@@ -142,17 +175,9 @@ public class GameFlowController : MonoBehaviour
         }
         deckController.HideDeck();
         yield return new WaitForSeconds(0.5f);
-        BtnNextPharse.interactable = true;
-    }
+        BtnEndTurn.interactable = true;
 
-    /// <summary>
-    /// display draw event cards animate<br/>
-    /// then go to play building cards pharse
-    /// </summary>
-    IEnumerator DrawEventCards()
-    {
-        // improve: animation of drawing event cards
-
+        // draw event cards
         GameObject[] eventCards = new GameObject[3];
         EventCardDisplayer.SetActive(true);
         for (int i = 0; i < eventCards.Length; i++)
@@ -171,6 +196,8 @@ public class GameFlowController : MonoBehaviour
             Destroy(eventCards[i]);
             eventCards[i] = null;
         }
+
+        InitialiseShop();
         OnBuildingPharseStart();
     }
 
@@ -178,6 +205,8 @@ public class GameFlowController : MonoBehaviour
     {
         deckController.ShowDeck();
         deckController.EnableCards();
+        BtnShopObj.SetActive(true);
+        BtnEndTurnObj.SetActive(true);
         BtnShopObj.SetActive(true);
         BtnShop.interactable = true;
         StartCoroutine(OnBuildingPharseStartLate());
@@ -187,13 +216,13 @@ public class GameFlowController : MonoBehaviour
     {
         // prevent multiple click on button
         yield return new WaitForSeconds(0.25f);
-        BtnNextPharse.interactable = true;
+        BtnEndTurn.interactable = true;
     }
 
     void OnBuildingPharseEnd()
     {
-        BtnNextPharse.interactable = false;
-        BtnNextPharseObj.SetActive(false);
+        BtnEndTurn.interactable = false;
+        BtnEndTurnObj.SetActive(false);
         BtnShop.interactable = false;
         BtnShopObj.SetActive(false);
         deckController.RemoveAll();
@@ -211,7 +240,7 @@ public class GameFlowController : MonoBehaviour
 
     void ShowShop()
     {
-        BtnNextPharseObj.SetActive(false);
+        BtnEndTurnObj.SetActive(false);
         shopController.gameObject.SetActive(true);
     }
 
@@ -232,7 +261,7 @@ public class GameFlowController : MonoBehaviour
     void HideShop()
     {
         shopController.gameObject.SetActive(false);
-        BtnNextPharseObj.SetActive(true);
+        BtnEndTurnObj.SetActive(true);
     }
 
     void ClearShop()
@@ -273,6 +302,13 @@ public class GameFlowController : MonoBehaviour
         }
 
         currentTurn++;
+
+        if (currentTurn > maxTurns)
+        {
+            OnGameOver(true);
+            return;
+        }
+
         tilemapController.board.StepAndRemoveEventBonus();
         TurnText.text = "Round: " + currentTurn + "/" + maxTurns;
     }
@@ -287,7 +323,7 @@ public class GameFlowController : MonoBehaviour
     {
         BtnSummary.interactable = false;
         SummaryObj.SetActive(false);
-        OnTurnBegin();
+        ShowTurnGuide();
     }
 
     void OnGameOver(bool win)
@@ -318,27 +354,8 @@ public class GameFlowController : MonoBehaviour
     /// </summary>
     public void OnBtnNextPharseClicked()
     {
-        BtnNextPharse.interactable = false;
-        TextMeshProUGUI textMesh = BtnNextPharse.GetComponentInChildren<TextMeshProUGUI>();
-        // go to draw building cards pharse
-        if (textMesh.text == BtnNextPharseText.drawBuildings)
-        {
-            textMesh.text = BtnNextPharseText.drawEvents;
-            StartCoroutine(DrawBuildingCards());
-        }
-        // go to draw event cards pharse
-        // then go to play building cards pharse
-        else if (textMesh.text == BtnNextPharseText.drawEvents)
-        {
-            textMesh.text = BtnNextPharseText.endTurn;
-            StartCoroutine(DrawEventCards());
-            InitialiseShop();
-        }
-        // end play building cards pharse
-        else if (textMesh.text == BtnNextPharseText.endTurn)
-        {
-            OnBuildingPharseEnd();
-        }
+        BtnEndTurn.interactable = false;
+        OnBuildingPharseEnd();
     }
 
     public void OnBtnShopClicked()

@@ -43,10 +43,17 @@ public class CardBehaviour : MonoBehaviour
         {
             GameObject _image = _cardButton.Find("Image").gameObject;
             _image.GetComponent<Image>().sprite = ModelManager.LoadImage(((BuildingCard)card).buildingID);
+
+            GameObject _income = _cardButton.Find("Income").gameObject;
+            _income.GetComponent<TextMeshProUGUI>().text = "▲" + ((BuildingCard)card).profit;
+
+            GameObject _upkeep = _cardButton.Find("Upkeep").gameObject;
+            _upkeep.GetComponent<TextMeshProUGUI>().text = "▼" + ((BuildingCard)card).upkeep;
         }
         if (card.type == CardType.Event)
         {
-
+            _cardButton.Find("Income").gameObject.SetActive(false);
+            _cardButton.Find("Upkeep").gameObject.SetActive(false);
         }
         transform.Find("CardButton").GetComponent<Button>().interactable = true;
         if (inShop)
